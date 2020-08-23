@@ -12,7 +12,8 @@ public:
     void Generate();
     void Print() const;
 
-    int CountNeighbors(int x, int y, TileType type) const;
+    int CountNeighbors8(int x, int y, TileType type, bool CountEdge = false) const;
+    int CountNeighbors4(int x, int y, TileType type, bool CountEdge = false) const;
     bool FindTile(int roomNumber, TileType type, int & x, int & y) const;
-    void RoomFlood(int roomNumber, TileType type, int x, int y);
+    void RoomFlood4(int roomNumber, TileType type, int x, int y);
 };

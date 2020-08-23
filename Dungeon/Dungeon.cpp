@@ -17,7 +17,7 @@ void Dungeon::Print() const {
         for (int row = 0; row < height; row++) {
             switch(tiles[row][col].type) {
                 case TileType::WALL:
-                    if(CountNeighbors(col, row, TileType::WALL) > 7) {
+                    if(CountNeighbors4(col, row, TileType::WALL, true) > 3) {
                         std::cout << ' ';
                     }
                     else {
@@ -51,12 +51,12 @@ void Dungeon::Generate() {
             for (int row = 0; row < height; row++) {
                 switch(tiles[row][col].type) {
                     case TileType::WALL:
-                        if(CountNeighbors(col, row, TileType::FLOOR) > 4) {
+                        if(CountNeighbors8(col, row, TileType::FLOOR) > 4) {
                             tiles[row][col].type = TileType::FLOOR;
                         }
                         break;
                     case TileType::FLOOR:
-                        if(CountNeighbors(col, row, TileType::WALL) > 4) {
+                        if(CountNeighbors8(col, row, TileType::WALL) > 4) {
                             tiles[row][col].type = TileType::WALL;
                         }
                         break;
@@ -68,22 +68,22 @@ void Dungeon::Generate() {
         int findX, findY;
         int roomCounter = 1;
         while(FindTile(0, TileType::FLOOR, findX, findY)) {
-            RoomFlood(roomCounter, TileType::FLOOR, findX, findY);
+            RoomFlood4(roomCounter, TileType::FLOOR, findX, findY);
             roomCounter++;
         }
     }
 }
 
-int Dungeon::CountNeighbors(int x, int y, TileType type) const {
+int Dungeon::CountNeighbors8(int x, int y, TileType type, bool CountEdge) const {
     int result = 0;
-    if(y > 0          && x > 0)         result += (tiles[y-1][x-1].type == type);
-    if(y > 0)                           result += (tiles[y-1][x  ].type == type);
-    if(y > 0          && x < width - 1) result += (tiles[y-1][x+1].type == type);
-    if(                  x > 0)         result += (tiles[y  ][x-1].type == type);
-    if(                  x < width - 1) result += (tiles[y  ][x+1].type == type);
-    if(y < height - 1 && x > 0)         result += (tiles[y+1][x-1].type == type);
-    if(y < height - 1)                  result += (tiles[y+1][x  ].type == type);
-    if(y < height - 1 && x < width - 1) result += (tiles[y+1][x+1].type == type);
+    if(y > 0          && x > 0)         result += (tiles[y-1][x-1].type == type); else result += CountEdge;
+    if(y > 0)                           result += (tiles[y-1][x  ].type == type); else result += CountEdge;
+    if(y > 0          && x < width - 1) result += (tiles[y-1][x+1].type == type); else result += CountEdge;
+    if(                  x > 0)         result += (tiles[y  ][x-1].type == type); else result += CountEdge;
+    if(                  x < width - 1) result += (tiles[y  ][x+1].type == type); else result += CountEdge;
+    if(y < height - 1 && x > 0)         result += (tiles[y+1][x-1].type == type); else result += CountEdge;
+    if(y < height - 1)                  result += (tiles[y+1][x  ].type == type); else result += CountEdge;
+    if(y < height - 1 && x < width - 1) result += (tiles[y+1][x+1].type == type); else result += CountEdge;
     return result;
 }
 
@@ -100,11 +100,20 @@ bool Dungeon::FindTile(int roomNumber, TileType type, int &x, int &y) const {
     return false;
 }
 
-void Dungeon::RoomFlood(int roomNumber, TileType type, int x, int y) {
+void Dungeon::RoomFlood4(int roomNumber, TileType type, int x, int y) {
     if(tiles[y][x].roomNumber == roomNumber || tiles[y][x].type != type) return;
     tiles[y][x].roomNumber = roomNumber;
-    if(y > 0) RoomFlood(roomNumber, type, x, y-1);
-    if(y < height - 1) RoomFlood(roomNumber, type, x, y+1);
-    if(x > 0) RoomFlood(roomNumber, type, x-1, y);
-    if(x < width - 1) RoomFlood(roomNumber, type, x+1, y);
+    if(y > 0) RoomFlood4(roomNumber, type, x, y - 1);
+    if(y < height - 1) RoomFlood4(roomNumber, type, x, y + 1);
+    if(x > 0) RoomFlood4(roomNumber, type, x - 1, y);
+    if(x < width - 1) RoomFlood4(roomNumber, type, x + 1, y);
+}
+
+int Dungeon::CountNeighbors4(int x, int y, TileType type, bool CountEdge) const {
+    int result = 0;
+    if(y > 0)                           result += (tiles[y-1][x  ].type == type); else result += CountEdge;
+    if(                  x > 0)         result += (tiles[y  ][x-1].type == type); else result += CountEdge;
+    if(                  x < width - 1) result += (tiles[y  ][x+1].type == type); else result += CountEdge;
+    if(y < height - 1)                  result += (tiles[y+1][x  ].type == type); else result += CountEdge;
+    return result;
 }
