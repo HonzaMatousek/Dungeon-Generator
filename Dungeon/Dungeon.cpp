@@ -21,7 +21,7 @@ void Dungeon::Print() const {
                         std::cout << ' ';
                     }
                     else {
-                        std::cout << '#';
+                        std::cout << "█";
                     }
                     break;
                 case TileType::FLOOR:
@@ -73,6 +73,7 @@ void Dungeon::Generate() {
         }
         auto roomNumberDistribution = std::uniform_int_distribution(1, roomCounter);
         auto randomDirection = std::uniform_int_distribution(0,1);
+        auto rotationDice = std::uniform_int_distribution(1, 20);
         for(int i = 0; i < 100; i++) {
             int roomNumber = roomNumberDistribution(g);
             if(!FindRandomTile(roomNumber, TileType::FLOOR, findX, findY, g)) continue;
@@ -82,6 +83,7 @@ void Dungeon::Generate() {
                 std::swap(diffX, diffY);
             }
             bool success = false;
+            std::vector<std::pair<int, int>> corridorTiles;
             for(int x = findX, y = findY; x > 0 && y > 0 && x < width - 1 && y < height - 1; x += diffX, y += diffY) {
                 if(CountNeighbors8OfRoom(x, y, TileType::FLOOR, 0) > 2) {
                     break;
@@ -91,17 +93,23 @@ void Dungeon::Generate() {
                     break;
                 }
                 if(tiles[y][x].type == TileType::WALL) {
+                    corridorTiles.push_back({ x, y });
                     tiles[y][x].type = TileType::FLOOR;
+                }
+                if(rotationDice(g) == 1) {
+                    if(randomDirection(g)) {
+                        std::swap(diffX, diffY);
+                        diffY *= -1;
+                    }
+                    else {
+                        std::swap(diffX, diffY);
+                        diffX *= -1;
+                    }
                 }
             }
             if(!success) {
-                for(int x = findX, y = findY; x > 0 && y > 0 && x < width - 1 && y < height - 1; x += diffX, y += diffY) {
-                    if(tiles[y][x].type == TileType::WALL) {
-                        break;
-                    }
-                    if(tiles[y][x].type == TileType::FLOOR && tiles[y][x].roomNumber == 0) {
-                        tiles[y][x].type = TileType::WALL;
-                    }
+                for(auto & tileCoordinates : corridorTiles) {
+                    tiles[tileCoordinates.second][tileCoordinates.first].type = TileType::WALL;
                 }
             }
         }
