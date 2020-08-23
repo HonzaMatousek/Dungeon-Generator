@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <random>
 #include "Tile.h"
 
 class Dungeon {
@@ -13,7 +14,9 @@ public:
     void Print() const;
 
     int CountNeighbors8(int x, int y, TileType type, bool CountEdge = false) const;
+    int CountNeighbors8OfRoom(int x, int y, TileType type, int roomNumber, bool CountEdge = false) const;
     int CountNeighbors4(int x, int y, TileType type, bool CountEdge = false) const;
     bool FindTile(int roomNumber, TileType type, int & x, int & y) const;
+    bool FindRandomTile(int roomNumber, TileType type, int & x, int & y, std::mt19937 & gen) const;
     void RoomFlood4(int roomNumber, TileType type, int x, int y);
 };
