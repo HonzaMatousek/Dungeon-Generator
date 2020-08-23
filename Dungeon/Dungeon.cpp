@@ -71,11 +71,27 @@ void Dungeon::Generate() {
             roomCounter++;
             RoomFlood4(roomCounter, TileType::FLOOR, findX, findY);
         }
+        if(roomCounter < 2) return;
         auto roomNumberDistribution = std::uniform_int_distribution(1, roomCounter);
         auto randomDirection = std::uniform_int_distribution(0,1);
         auto rotationDice = std::uniform_int_distribution(1, 20);
-        for(int i = 0; i < 100; i++) {
-            int roomNumber = roomNumberDistribution(g);
+        int corridorCounter = 0;
+        std::vector<std::vector<int>> roomConnections;
+        roomConnections.resize(roomCounter + 1);
+        for(auto & source : roomConnections) {
+            source.resize(roomCounter + 1);
+            for(auto & target : source) {
+                target = 0;
+            }
+        }
+        while(corridorCounter < roomCounter * 1.5) {
+            int roomWithFewestConnections = 1;
+            for(int i = 2; i <= roomCounter; i++) {
+                if(roomConnections[i][0] < roomConnections[roomWithFewestConnections][0]) {
+                    roomWithFewestConnections = i;
+                }
+            }
+            int roomNumber = roomWithFewestConnections;
             if(!FindRandomTile(roomNumber, TileType::FLOOR, findX, findY, g)) continue;
             int diffX = randomDirection(g) ? 1 : -1;
             int diffY = 0;
@@ -89,7 +105,25 @@ void Dungeon::Generate() {
                     break;
                 }
                 if(tiles[y][x].type == TileType::FLOOR && tiles[y][x].roomNumber != roomNumber) {
+                    if(tiles[y][x].roomNumber == 0) break;
                     success = true;
+                    int connectedRoom = tiles[y][x].roomNumber;
+                    for(int i = 1; i <= roomCounter; i++) {
+                        // create connections between 2 rooms
+                        roomConnections[connectedRoom][roomNumber] = 1;
+                        roomConnections[roomNumber][connectedRoom] = 1;
+                        // mark all connected rooms as connected to the other room
+                        roomConnections[roomNumber][i] |= roomConnections[connectedRoom][i];
+                        roomConnections[i][roomNumber] |= roomConnections[i][connectedRoom];
+                        roomConnections[connectedRoom][i] |= roomConnections[roomNumber][i];
+                        roomConnections[i][connectedRoom] |= roomConnections[i][roomNumber];
+                    }
+                    for(int i = 1; i <= roomCounter; i++) {
+                        roomConnections[i][0] = 0;
+                        for (int j = 1; j <= roomCounter; j++) {
+                            roomConnections[i][0] += roomConnections[i][j];
+                        }
+                    }
                     break;
                 }
                 if(tiles[y][x].type == TileType::WALL) {
@@ -111,6 +145,9 @@ void Dungeon::Generate() {
                 for(auto & tileCoordinates : corridorTiles) {
                     tiles[tileCoordinates.second][tileCoordinates.first].type = TileType::WALL;
                 }
+            }
+            else {
+                corridorCounter++;
             }
         }
     }
