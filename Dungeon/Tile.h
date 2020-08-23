@@ -8,4 +8,5 @@ enum class TileType {
 class Tile {
 public:
     TileType type;
+    int roomNumber = 0;
 };

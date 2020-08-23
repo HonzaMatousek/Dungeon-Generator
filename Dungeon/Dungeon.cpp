@@ -13,14 +13,19 @@ Dungeon::Dungeon(int width, int height) : width(width), height(height) {
 }
 
 void Dungeon::Print() const {
-    for(auto & row : tiles) {
-        for(auto & tile : row) {
-            switch(tile.type) {
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            switch(tiles[row][col].type) {
                 case TileType::WALL:
-                    std::cout << '#';
+                    if(CountNeighbors(col, row, TileType::WALL) > 7) {
+                        std::cout << ' ';
+                    }
+                    else {
+                        std::cout << '#';
+                    }
                     break;
                 case TileType::FLOOR:
-                    std::cout << ' ';
+                    std::cout << (char)('0' + tiles[row][col].roomNumber);
                     break;
             }
         }
@@ -59,6 +64,14 @@ void Dungeon::Generate() {
             }
         }
     }
+    {
+        int findX, findY;
+        int roomCounter = 1;
+        while(FindTile(0, TileType::FLOOR, findX, findY)) {
+            RoomFlood(roomCounter, TileType::FLOOR, findX, findY);
+            roomCounter++;
+        }
+    }
 }
 
 int Dungeon::CountNeighbors(int x, int y, TileType type) const {
@@ -72,4 +85,26 @@ int Dungeon::CountNeighbors(int x, int y, TileType type) const {
     if(y < height - 1)                  result += (tiles[y+1][x  ].type == type);
     if(y < height - 1 && x < width - 1) result += (tiles[y+1][x+1].type == type);
     return result;
+}
+
+bool Dungeon::FindTile(int roomNumber, TileType type, int &x, int &y) const {
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type) {
+                x = col;
+                y = row;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Dungeon::RoomFlood(int roomNumber, TileType type, int x, int y) {
+    if(tiles[y][x].roomNumber == roomNumber || tiles[y][x].type != type) return;
+    tiles[y][x].roomNumber = roomNumber;
+    if(y > 0) RoomFlood(roomNumber, type, x, y-1);
+    if(y < height - 1) RoomFlood(roomNumber, type, x, y+1);
+    if(x > 0) RoomFlood(roomNumber, type, x-1, y);
+    if(x < width - 1) RoomFlood(roomNumber, type, x+1, y);
 }

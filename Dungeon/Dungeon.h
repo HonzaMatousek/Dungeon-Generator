@@ -13,4 +13,6 @@ public:
     void Print() const;
 
     int CountNeighbors(int x, int y, TileType type) const;
+    bool FindTile(int roomNumber, TileType type, int & x, int & y) const;
+    void RoomFlood(int roomNumber, TileType type, int x, int y);
 };
