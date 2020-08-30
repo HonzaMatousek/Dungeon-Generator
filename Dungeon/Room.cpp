@@ -2,6 +2,7 @@
 
 void Room::Generate(double minRoomRatio, double maxRoomRatio) {
     bool success = false;
+    doors.clear();
     while(!success) {
         auto r = std::random_device();
         auto g = std::mt19937(r());

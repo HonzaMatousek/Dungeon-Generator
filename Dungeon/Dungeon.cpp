@@ -66,21 +66,32 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
 }
 
 void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
-    std::vector<Room> rooms;
-    for(int i = 0; i < 1; i++) {
-        Room room(20,20);
-        room.Generate(0.2,0.3);
-        rooms.emplace_back(std::move(room));
-    }
     auto r = std::random_device();
     auto g = std::mt19937(r());
-    int roomCounter = 0;
+    Room initialRoom(30,30);
+    initialRoom.Generate(0.3, 0.4);
+    while(!PlaceRoom(initialRoom, 1, (width - initialRoom.width) / 2, (height - initialRoom.height) / 2, Random::PickRandomRotation(g))) {
+        initialRoom.Generate(0.3, 0.4);
+    }
+    int roomCounter = 1;
     while(roomCounter < 10) {
-        auto randomRoom = Random::PickRandomElement(rooms, g);
-        auto randX = std::uniform_int_distribution(0, width - randomRoom.width);
-        auto randY = std::uniform_int_distribution(0, height - randomRoom.height);
-        if(PlaceRoom(randomRoom, roomCounter + 1, randX(g), randY(g), Random::PickRandomRotation(g))) {
-            roomCounter++;
+        Room otherRoom(20, 20);
+        otherRoom.Generate(0.2, 0.3);
+        bool success = false;
+        for(const auto & door : doors) {
+            for(const auto & otherRoomDoor : otherRoom.doors) {
+                Rotation otherRotation = Random::PickRandomRotation(g);
+                int dx, dy;
+                TransformCoords(otherRoomDoor.x, otherRoomDoor.y, otherRoom.width, otherRoom.height, otherRotation, dx, dy);
+                if(PlaceRoom(otherRoom, roomCounter + 1, door.x - dx, door.y - dy, otherRotation)) {
+                    roomCounter++;
+                    success = true;
+                    break;
+                }
+            }
+            if(success) {
+                break;
+            }
         }
     }
     for(auto const & door : doors) {
@@ -164,7 +175,7 @@ bool Dungeon::FindRandomTile(int roomNumber, TileType type, int &x, int &y, std:
     std::vector<std::pair<int, int>> roomTiles;
     for (int col = 0; col < width; col++) {
         for (int row = 0; row < height; row++) {
-            if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type && CountNeighbors4(col, row, type) < 4) {
+            if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type && CountNeighbors4(col, row, type, true) < 4) {
                 roomTiles.push_back({col, row});
             }
         }
@@ -221,7 +232,7 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation
             dcol += x;
             drow += y;
             if(room.tiles[row][col].type == TileType::FLOOR) {
-                if(drow > height - 2 || dcol > width - 2 || tiles[drow][dcol].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(dcol, drow, TileType::FLOOR, roomNumber)) {
+                if(drow > height - 2 || dcol > width - 2 || drow < 1 || dcol < 1 || tiles[drow][dcol].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(dcol, drow, TileType::FLOOR, roomNumber)) {
                     failed = true;
                     continue;
                 }
