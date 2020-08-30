@@ -6,6 +6,7 @@
 #include "RectangleRoom.h"
 #include <random>
 #include <memory>
+#include <set>
 
 Dungeon::Dungeon(int width, int height) : width(width), height(height) {
     tiles.resize(height);
@@ -105,9 +106,6 @@ void Dungeon::GenerateDungeon() {
             }
         }
     }
-    for(auto const & door : doors) {
-        tiles[door.y][door.x].roomNumber = -1;
-    }
     int corridorCounter = 0;
     for(int tryCounter = 0; corridorCounter < 10 && tryCounter < 10000; tryCounter++) {
         const auto & door = Random::PickRandomElement(doors, g);
@@ -148,6 +146,19 @@ void Dungeon::GenerateDungeon() {
                     tiles[y][x].type = TileType::WALL;
                 }
             }
+        }
+    }
+    for(auto const & door : doors) {
+        std::set<int> neighbors;
+        if(door.y < height - 1 && tiles[door.y+1][door.x].roomNumber > 0) { neighbors.insert(tiles[door.y+1][door.x].roomNumber); }
+        if(door.y > 0          && tiles[door.y-1][door.x].roomNumber > 0) { neighbors.insert(tiles[door.y-1][door.x].roomNumber); }
+        if(door.x < width - 1  && tiles[door.y][door.x+1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x+1].roomNumber); }
+        if(door.x > 0          && tiles[door.y][door.x-1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x-1].roomNumber); }
+        if(neighbors.size() <= 1) {
+            tiles[door.y][door.x].roomNumber = 0;
+        }
+        else {
+            tiles[door.y][door.x].roomNumber = -1;
         }
     }
 }
