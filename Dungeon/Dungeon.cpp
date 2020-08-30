@@ -217,13 +217,15 @@ bool Dungeon::FindTile(int roomNumber, TileType type, int &x, int &y) const {
     return false;
 }
 
-void Dungeon::RoomFlood4(int roomNumber, TileType type, int x, int y) {
-    if(tiles[y][x].roomNumber == roomNumber || tiles[y][x].type != type) return;
+int Dungeon::RoomFlood4(int roomNumber, TileType type, int x, int y) {
+    if(tiles[y][x].roomNumber == roomNumber || tiles[y][x].type != type) return 0;
     tiles[y][x].roomNumber = roomNumber;
-    if(y > 0) RoomFlood4(roomNumber, type, x, y - 1);
-    if(y < height - 1) RoomFlood4(roomNumber, type, x, y + 1);
-    if(x > 0) RoomFlood4(roomNumber, type, x - 1, y);
-    if(x < width - 1) RoomFlood4(roomNumber, type, x + 1, y);
+    int result = 1;
+    if(y > 0)          result += RoomFlood4(roomNumber, type, x, y - 1);
+    if(y < height - 1) result += RoomFlood4(roomNumber, type, x, y + 1);
+    if(x > 0)          result += RoomFlood4(roomNumber, type, x - 1, y);
+    if(x < width - 1)  result += RoomFlood4(roomNumber, type, x + 1, y);
+    return result;
 }
 
 int Dungeon::CountNeighbors4(int x, int y, TileType type, bool CountEdge) const {

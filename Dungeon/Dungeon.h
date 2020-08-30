@@ -19,7 +19,7 @@ public:
     int CountNeighbors4(int x, int y, TileType type, bool CountEdge = false) const;
     bool FindTile(int roomNumber, TileType type, int & x, int & y) const;
     bool FindRandomTile(int roomNumber, TileType type, int & x, int & y, std::mt19937 & gen) const;
-    void RoomFlood4(int roomNumber, TileType type, int x, int y);
+    int RoomFlood4(int roomNumber, TileType type, int x, int y);
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
 };
