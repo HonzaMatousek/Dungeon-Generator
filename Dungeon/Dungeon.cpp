@@ -260,6 +260,7 @@ void Dungeon::Noise(std::mt19937 &gen) {
     auto d = std::uniform_int_distribution(0, 1);
     for (int col = 0; col < width; col++) {
         for (int row = 0; row < height; row++) {
+            tiles[row][col].roomNumber = 0;
             if(col == 0 || col == width - 1 || row == 0 || row == height - 1) {
                 tiles[row][col].type = TileType::WALL;
                 continue;
