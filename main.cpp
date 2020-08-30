@@ -2,7 +2,7 @@
 #include "Dungeon/Dungeon.h"
 
 int main() {
-    Dungeon dungeon(80, 50);
+    Dungeon dungeon(220, 45);
     dungeon.Generate();
     dungeon.Print();
     return 0;
