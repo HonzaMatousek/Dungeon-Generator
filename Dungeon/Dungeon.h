@@ -4,6 +4,7 @@
 #include <random>
 #include "Tile.h"
 #include "../Util/Constants.h"
+#include "../Util/TileCoord.h"
 
 class Room;
 
@@ -12,6 +13,7 @@ protected:
     int width;
     int height;
     std::vector<std::vector<Tile>> tiles;
+    std::vector<TileCoord> doors;
 public:
     Dungeon(int width, int height);
     virtual void Generate(double minRoomRatio = 0, double maxRoomRatio = 1);
@@ -27,4 +29,5 @@ public:
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
     bool PlaceRoom(const Room & room, int roomNumber, int x, int y, Rotation rotation);
+    static void TransformCoords(int x, int y, int width, int height, Rotation rotation, int & outX, int & outY);
 };

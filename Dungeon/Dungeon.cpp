@@ -23,7 +23,12 @@ void Dungeon::Print() const {
                         std::cout << ' ';
                     }
                     else {
-                        std::cout << "█";
+                        if(tiles[row][col].roomNumber == -1) {
+                            std::cout << "#";
+                        }
+                        else {
+                            std::cout << "█";
+                        }
                     }
                     break;
                 case TileType::FLOOR:
@@ -77,6 +82,9 @@ void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
         if(PlaceRoom(randomRoom, roomCounter + 1, randX(g), randY(g), Random::PickRandomRotation(g))) {
             roomCounter++;
         }
+    }
+    for(auto const & door : doors) {
+        tiles[door.y][door.x].roomNumber = -1;
     }
 }
 
@@ -209,24 +217,9 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation
     for (int col = 0; !failed && col < room.width; col++) {
         for (int row = 0; !failed && row < room.height; row++) {
             int dcol, drow;
-            switch(rotation) {
-                case Rotation::D0:
-                    dcol = col + x;
-                    drow = row + y;
-                    break;
-                case Rotation::D90:
-                    dcol = row + y;
-                    drow = room.width - 1 - col + x;
-                    break;
-                case Rotation::D180:
-                    dcol = room.width - 1 - col + x;
-                    drow = room.height - 1 - row + y;
-                    break;
-                case Rotation::D270:
-                    dcol = room.height - 1 - row + y;
-                    drow = col + x;
-                    break;
-            }
+            TransformCoords(col, row, room.width, room.height, rotation, dcol, drow);
+            dcol += x;
+            drow += y;
             if(room.tiles[row][col].type == TileType::FLOOR) {
                 if(drow > height - 2 || dcol > width - 2 || tiles[drow][dcol].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(dcol, drow, TileType::FLOOR, roomNumber)) {
                     failed = true;
@@ -247,5 +240,35 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation
             }
         }
     }
+    else {
+        for(auto const & door : room.doors) {
+            int dcol, drow;
+            TransformCoords(door.x, door.y, room.width, room.height, rotation, dcol, drow);
+            dcol += x;
+            drow += y;
+            doors.push_back({ dcol, drow, Rotation::D0 });
+        }
+    }
     return !failed;
+}
+
+void Dungeon::TransformCoords(int x, int y, int width, int height, Rotation rotation, int &outX, int &outY) {
+    switch(rotation) {
+        case Rotation::D0:
+            outX = x;
+            outY = y;
+            break;
+        case Rotation::D90:
+            outX = y;
+            outY = width - 1 - x;
+            break;
+        case Rotation::D180:
+            outX = width - 1 - x;
+            outY = height - 1 - y;
+            break;
+        case Rotation::D270:
+            outX = height - 1 - y;
+            outY = x;
+            break;
+    }
 }
