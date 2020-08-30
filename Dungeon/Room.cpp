@@ -1,6 +1,6 @@
 #include "Room.h"
 
-void Room::Generate() {
+void Room::Generate(double minRoomRatio, double maxRoomRatio) {
     bool success = false;
     while(!success) {
         auto r = std::random_device();
@@ -12,12 +12,13 @@ void Room::Generate() {
         {
             int findX, findY;
             int roomCounter = 0;
-            int bestRoomSize = 550;
+            int bestRoomSize = (width - 2) * (height - 2) * minRoomRatio;
+            int maxRoomSize = (width - 2) * (height - 2) * maxRoomRatio;
             int bestRoomNumber = 0;
             while (FindTile(0, TileType::FLOOR, findX, findY)) {
                 roomCounter++;
                 int roomSize = RoomFlood4(roomCounter, TileType::FLOOR, findX, findY);
-                if (roomSize > bestRoomSize) {
+                if (roomSize > bestRoomSize && roomSize < maxRoomSize) {
                     bestRoomSize = roomSize;
                     bestRoomNumber = roomCounter;
                 }

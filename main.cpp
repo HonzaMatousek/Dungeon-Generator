@@ -7,7 +7,7 @@ int main() {
     //dungeon.Generate();
     //dungeon.Print();
     Room room(30, 30);
-    room.Generate();
+    room.Generate(0.0,0.1);
     room.Print();
     return 0;
 }

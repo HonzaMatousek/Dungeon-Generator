@@ -58,7 +58,7 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
     }
 }
 
-void Dungeon::Generate() {
+void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
     auto r = std::random_device();
     auto g = std::mt19937(r());
     Noise(g);

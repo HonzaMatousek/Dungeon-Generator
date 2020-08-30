@@ -11,7 +11,7 @@ protected:
     std::vector<std::vector<Tile>> tiles;
 public:
     Dungeon(int width, int height);
-    virtual void Generate();
+    virtual void Generate(double minRoomRatio = 0, double maxRoomRatio = 1);
     void Print() const;
 
     int CountNeighbors8(int x, int y, TileType type, bool CountEdge = false) const;
