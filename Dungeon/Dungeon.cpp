@@ -74,9 +74,9 @@ void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
         initialRoom.Generate(0.3, 0.4);
     }
     int roomCounter = 1;
-    while(roomCounter < 10) {
+    while(roomCounter < 30) {
         Room otherRoom(20, 20);
-        otherRoom.Generate(0.2, 0.3);
+        otherRoom.Generate(0.1, 0.3);
         bool success = false;
         for(const auto & door : doors) {
             for(const auto & otherRoomDoor : otherRoom.doors) {

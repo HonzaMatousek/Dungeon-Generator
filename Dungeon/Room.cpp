@@ -39,7 +39,7 @@ void Room::Generate(double minRoomRatio, double maxRoomRatio) {
                     }
                 }
             }
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < std::sqrt(bestRoomSize); i++) {
                 if(FindRandomTile(0, TileType::WALL, findX, findY, g)) {
                     doors.push_back({ findX, findY, Rotation::D0 });
                 }
