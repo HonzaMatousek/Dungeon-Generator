@@ -1,5 +1,7 @@
 #include <iostream>
 #include "Dungeon.h"
+#include "Room.h"
+#include "../Util/Random.h"
 #include <random>
 
 Dungeon::Dungeon(int width, int height) : width(width), height(height) {
@@ -59,121 +61,21 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
 }
 
 void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
+    std::vector<Room> rooms;
+    for(int i = 0; i < 2; i++) {
+        Room room(20,20);
+        room.Generate(0.2,0.3);
+        rooms.emplace_back(std::move(room));
+    }
     auto r = std::random_device();
     auto g = std::mt19937(r());
-    Noise(g);
-    for(int i = 0; i < 5; i++) {
-        Blur(5, 5);
-    }
-    {
-        int findX, findY;
-        int roomCounter = 0;
-        while(FindTile(0, TileType::FLOOR, findX, findY)) {
+    int roomCounter = 0;
+    while(roomCounter < 10) {
+        auto randomRoom = Random::PickRandomElement(rooms, g);
+        auto randX = std::uniform_int_distribution(0, width - randomRoom.width);
+        auto randY = std::uniform_int_distribution(0, height - randomRoom.height);
+        if(PlaceRoom(randomRoom, roomCounter + 1, randX(g), randY(g))) {
             roomCounter++;
-            RoomFlood4(roomCounter, TileType::FLOOR, findX, findY);
-        }
-        if(roomCounter < 2) return;
-        auto roomNumberDistribution = std::uniform_int_distribution(1, roomCounter);
-        auto randomDirection = std::uniform_int_distribution(0,1);
-        auto rotationDice = std::uniform_int_distribution(1, 20);
-        int corridorCounter = 0;
-        std::vector<std::vector<int>> roomConnections;
-        roomConnections.resize(roomCounter + 1);
-        for(auto & source : roomConnections) {
-            source.resize(roomCounter + 1);
-            for(auto & target : source) {
-                target = 0;
-            }
-        }
-        for(int tryCounter = 0; corridorCounter < roomCounter * 1.5; tryCounter++) {
-            int roomWithFewestConnections = 1;
-            std::vector<int> roomsWithFewestConnections;
-            roomsWithFewestConnections.push_back(1);
-            for(int i = 2; i <= roomCounter; i++) {
-                if(roomConnections[i][0] < roomConnections[roomWithFewestConnections][0]) {
-                    roomsWithFewestConnections.clear();
-                    roomsWithFewestConnections.push_back(i);
-                    roomWithFewestConnections = i;
-                }
-                else if(roomConnections[i][0] == roomConnections[roomWithFewestConnections][0]) {
-                    roomsWithFewestConnections.push_back(i);
-                }
-            }
-            int roomNumber =  roomsWithFewestConnections[std::uniform_int_distribution<size_t>(0, roomsWithFewestConnections.size() - 1)(g)];
-            if(tryCounter > 10000) {
-                if(roomConnections[roomNumber][0] >= roomCounter - 1) {
-                    return;
-                }
-                std::cout << roomCounter << std::endl;
-                std::cout << "FAIL. Trying to connect room " << roomNumber << " (" << (char)('0' + roomNumber) << "), without success." << std::endl;
-                Print();
-                std::cout << std::endl;
-                for (int col = 0; col < width; col++) {
-                    for (int row = 0; row < height; row++) {
-                        tiles[row][col].roomNumber = 0;
-                    }
-                }
-                int roomCounter = 0;
-                while(FindTile(0, TileType::FLOOR, findX, findY)) {
-                    roomCounter++;
-                    RoomFlood4(roomCounter, TileType::FLOOR, findX, findY);
-                }
-                std::cout << roomCounter << " separate areas" << std::endl;
-                return;
-            }
-            if(!FindRandomTile(roomNumber, TileType::FLOOR, findX, findY, g)) continue;
-            int diffX = randomDirection(g) ? 1 : -1;
-            int diffY = 0;
-            if(randomDirection(g)) {
-                std::swap(diffX, diffY);
-            }
-            bool success = false;
-            std::vector<std::pair<int, int>> corridorTiles;
-            for(int x = findX, y = findY; x > 0 && y > 0 && x < width - 1 && y < height - 1; x += diffX, y += diffY) {
-                if(CountNeighbors8OfRoom(x, y, TileType::FLOOR, 0) > 2) {
-                    break;
-                }
-                if(diffY != 1 && tiles[y+1][x].type == TileType::FLOOR && tiles[y+1][x].roomNumber != roomNumber && tiles[y+1][x].roomNumber != 0 && tiles[y+1][x].roomNumber != tiles[y+diffY][x+diffY].roomNumber) {
-                    break;
-                }
-                if(diffY != -1 && tiles[y-1][x].type == TileType::FLOOR && tiles[y-1][x].roomNumber != roomNumber && tiles[y-1][x].roomNumber != 0 && tiles[y-1][x].roomNumber != tiles[y+diffY][x+diffY].roomNumber) {
-                    break;
-                }
-                if(diffX != 1 && tiles[y][x+1].type == TileType::FLOOR && tiles[y][x+1].roomNumber != roomNumber && tiles[y][x+1].roomNumber != 0 && tiles[y][x+1].roomNumber != tiles[y+diffY][x+diffY].roomNumber) {
-                    break;
-                }
-                if(diffX != -1 && tiles[y][x-1].type == TileType::FLOOR && tiles[y][x-1].roomNumber != roomNumber && tiles[y][x-1].roomNumber != 0 && tiles[y][x-1].roomNumber != tiles[y+diffY][x+diffY].roomNumber) {
-                    break;
-                }
-                if(tiles[y][x].type == TileType::FLOOR && tiles[y][x].roomNumber != roomNumber) {
-                    if(tiles[y][x].roomNumber == 0) break;
-                    success = true;
-                    ConnectTwoRooms(roomNumber, tiles[y][x].roomNumber, roomConnections);
-                    break;
-                }
-                if(tiles[y][x].type == TileType::WALL) {
-                    corridorTiles.push_back({ x, y });
-                    tiles[y][x].type = TileType::FLOOR;
-                }
-                if(rotationDice(g) == 1) {
-                    if(randomDirection(g)) {
-                        std::swap(diffX, diffY);
-                        diffY *= -1;
-                    }
-                    else {
-                        std::swap(diffX, diffY);
-                        diffX *= -1;
-                    }
-                }
-            }
-            if(!success) {
-                for(auto & tileCoordinates : corridorTiles) {
-                    tiles[tileCoordinates.second][tileCoordinates.first].type = TileType::WALL;
-                }
-            }
-            else {
-                corridorCounter++;
-            }
         }
     }
 }
@@ -191,7 +93,7 @@ int Dungeon::CountNeighbors8(int x, int y, TileType type, bool CountEdge) const 
     return result;
 }
 
-int Dungeon::CountNeighbors8OfRoom(int x, int y, TileType type, int roomNumber, bool CountEdge) const {
+int Dungeon::CountNeighbors8OfSameRoom(int x, int y, TileType type, int roomNumber, bool CountEdge) const {
     int result = 0;
     if(y > 0          && x > 0)         result += (tiles[y-1][x-1].type == type && tiles[y-1][x-1].roomNumber == roomNumber); else result += CountEdge;
     if(y > 0)                           result += (tiles[y-1][x  ].type == type && tiles[y-1][x  ].roomNumber == roomNumber); else result += CountEdge;
@@ -201,6 +103,19 @@ int Dungeon::CountNeighbors8OfRoom(int x, int y, TileType type, int roomNumber, 
     if(y < height - 1 && x > 0)         result += (tiles[y+1][x-1].type == type && tiles[y+1][x-1].roomNumber == roomNumber); else result += CountEdge;
     if(y < height - 1)                  result += (tiles[y+1][x  ].type == type && tiles[y+1][x  ].roomNumber == roomNumber); else result += CountEdge;
     if(y < height - 1 && x < width - 1) result += (tiles[y+1][x+1].type == type && tiles[y+1][x+1].roomNumber == roomNumber); else result += CountEdge;
+    return result;
+}
+
+int Dungeon::CountNeighbors8OfOtherRoom(int x, int y, TileType type, int roomNumber, bool CountEdge) const {
+    int result = 0;
+    if(y > 0          && x > 0)         result += (tiles[y-1][x-1].type == type && tiles[y-1][x-1].roomNumber != roomNumber); else result += CountEdge;
+    if(y > 0)                           result += (tiles[y-1][x  ].type == type && tiles[y-1][x  ].roomNumber != roomNumber); else result += CountEdge;
+    if(y > 0          && x < width - 1) result += (tiles[y-1][x+1].type == type && tiles[y-1][x+1].roomNumber != roomNumber); else result += CountEdge;
+    if(                  x > 0)         result += (tiles[y  ][x-1].type == type && tiles[y  ][x-1].roomNumber != roomNumber); else result += CountEdge;
+    if(                  x < width - 1) result += (tiles[y  ][x+1].type == type && tiles[y  ][x+1].roomNumber != roomNumber); else result += CountEdge;
+    if(y < height - 1 && x > 0)         result += (tiles[y+1][x-1].type == type && tiles[y+1][x-1].roomNumber != roomNumber); else result += CountEdge;
+    if(y < height - 1)                  result += (tiles[y+1][x  ].type == type && tiles[y+1][x  ].roomNumber != roomNumber); else result += CountEdge;
+    if(y < height - 1 && x < width - 1) result += (tiles[y+1][x+1].type == type && tiles[y+1][x+1].roomNumber != roomNumber); else result += CountEdge;
     return result;
 }
 
@@ -287,4 +202,31 @@ void Dungeon::Blur(int floorThreshold, int wallThreshold) {
             }
         }
     }
+}
+
+bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y) {
+    bool failed = false;
+    for (int col = 0; !failed && col < room.width; col++) {
+        for (int row = 0; !failed && row < room.height; row++) {
+            if(room.tiles[row][col].type == TileType::FLOOR) {
+                if(row + y > height - 2 || col + x > width - 2 || tiles[row + y][col + x].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(col + x, row + y, TileType::FLOOR, roomNumber)) {
+                    failed = true;
+                    continue;
+                }
+                tiles[row + y][col + x].type = TileType::FLOOR;
+                tiles[row + y][col + x].roomNumber = roomNumber;
+            }
+        }
+    }
+    if(failed) {
+        for (int col = 0; col < width; col++) {
+            for (int row = 0; row < height; row++) {
+                if(tiles[row][col].type == TileType::FLOOR && tiles[row][col].roomNumber == roomNumber) {
+                    tiles[row][col].type = TileType::WALL;
+                    tiles[row][col].roomNumber = 0;
+                }
+            }
+        }
+    }
+    return !failed;
 }
