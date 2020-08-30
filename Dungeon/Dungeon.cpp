@@ -3,6 +3,7 @@
 #include "Room.h"
 #include "../Util/Random.h"
 #include "CaveRoom.h"
+#include "RectangleRoom.h"
 #include <random>
 #include <memory>
 
@@ -76,8 +77,14 @@ void Dungeon::GenerateDungeon() {
         initialRoom->Generate(0.3, 0.4);
     }
     int roomCounter = 1;
-    while(roomCounter < 30) {
-        std::unique_ptr<Room> otherRoom = std::make_unique<CaveRoom>(20,20);
+    while(roomCounter < 20) {
+        std::unique_ptr<Room> otherRoom;
+        if(std::uniform_int_distribution(0,1)(g)) {
+            otherRoom = std::make_unique<CaveRoom>(20, 20);
+        }
+        else {
+            otherRoom = std::make_unique<RectangleRoom>(20, 20);
+        }
         otherRoom->Generate(0.1, 0.3);
         bool success = false;
         for(const auto & door : doors) {
