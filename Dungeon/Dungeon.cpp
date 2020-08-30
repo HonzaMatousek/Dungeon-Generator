@@ -77,7 +77,7 @@ void Dungeon::GenerateDungeon() {
         initialRoom->Generate(0.3, 0.4);
     }
     int roomCounter = 1;
-    while(roomCounter < 20) {
+    for(int tryCounter = 0; roomCounter < 40 && tryCounter < 10000; tryCounter++) {
         std::unique_ptr<Room> otherRoom;
         if(std::uniform_int_distribution(0,1)(g)) {
             otherRoom = std::make_unique<CaveRoom>(20, 20);
@@ -88,6 +88,7 @@ void Dungeon::GenerateDungeon() {
         otherRoom->Generate(0.1, 0.3);
         bool success = false;
         for(const auto & door : doors) {
+            if(tiles[door.y][door.x].roomNumber == -1) continue;
             for(const auto & otherRoomDoor : otherRoom->doors) {
                 Rotation otherRotation = Random::PickRandomRotation(g);
                 int dx, dy;
@@ -99,6 +100,7 @@ void Dungeon::GenerateDungeon() {
                 }
             }
             if(success) {
+                tiles[door.y][door.x].roomNumber = -1;
                 break;
             }
         }
