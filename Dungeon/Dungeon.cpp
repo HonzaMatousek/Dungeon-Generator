@@ -61,51 +61,9 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
 void Dungeon::Generate() {
     auto r = std::random_device();
     auto g = std::mt19937(r());
-    auto d = std::uniform_int_distribution(0, 1);
-    for (int col = 0; col < width; col++) {
-        for (int row = 0; row < height; row++) {
-            if(col == 0 || col == width - 1 || row == 0 || row == height - 1) {
-                tiles[row][col].type = TileType::WALL;
-                continue;
-            }
-            tiles[row][col].type = (d(g)) ? TileType::FLOOR : TileType::WALL;
-        }
-    }
+    Noise(g);
     for(int i = 0; i < 5; i++) {
-        for (int col = 0; col < width; col++) {
-            for (int row = 0; row < height; row++) {
-                switch(tiles[row][col].type) {
-                    case TileType::WALL:
-                        if(CountNeighbors8(col, row, TileType::FLOOR) > 5) {
-                            tiles[row][col].type = TileType::FLOOR;
-                        }
-                        break;
-                    case TileType::FLOOR:
-                        if(CountNeighbors8(col, row, TileType::WALL) > 5) {
-                            tiles[row][col].type = TileType::WALL;
-                        }
-                        if(CountNeighbors4(col, row, TileType::WALL) == 4) {
-                            tiles[row][col].type = TileType::WALL;
-                        }
-                        break;
-                }
-            }
-        }
-    }
-    for(int i = 0; i < 4; i++) {
-        for (int col = 0; col < width; col++) {
-            for (int row = 0; row < height; row++) {
-                switch(tiles[row][col].type) {
-                    case TileType::FLOOR:
-                        if(CountNeighbors4(col, row, TileType::WALL) == 4) {
-                            tiles[row][col].type = TileType::WALL;
-                        }
-                        break;
-                    default:
-                        ;
-                }
-            }
-        }
+        Blur(5, 5);
     }
     {
         int findX, findY;
@@ -294,4 +252,36 @@ bool Dungeon::FindRandomTile(int roomNumber, TileType type, int &x, int &y, std:
     x = tile.first;
     y = tile.second;
     return true;
+}
+
+void Dungeon::Noise(std::mt19937 &gen) {
+    auto d = std::uniform_int_distribution(0, 1);
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            if(col == 0 || col == width - 1 || row == 0 || row == height - 1) {
+                tiles[row][col].type = TileType::WALL;
+                continue;
+            }
+            tiles[row][col].type = (d(gen)) ? TileType::FLOOR : TileType::WALL;
+        }
+    }
+}
+
+void Dungeon::Blur(int floorThreshold, int wallThreshold) {
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            switch(tiles[row][col].type) {
+                case TileType::WALL:
+                    if(CountNeighbors8(col, row, TileType::FLOOR) > floorThreshold) {
+                        tiles[row][col].type = TileType::FLOOR;
+                    }
+                    break;
+                case TileType::FLOOR:
+                    if(CountNeighbors8(col, row, TileType::WALL) > wallThreshold) {
+                        tiles[row][col].type = TileType::WALL;
+                    }
+                    break;
+            }
+        }
+    }
 }
