@@ -192,6 +192,15 @@ bool Dungeon::FindRandomTile(int roomNumber, TileType type, int &x, int &y, std:
     return true;
 }
 
+void Dungeon::Reset() {
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            tiles[row][col].roomNumber = 0;
+            tiles[row][col].type = TileType::WALL;
+        }
+    }
+}
+
 void Dungeon::Noise(std::mt19937 &gen) {
     auto d = std::uniform_int_distribution(0, 1);
     for (int col = 0; col < width; col++) {
