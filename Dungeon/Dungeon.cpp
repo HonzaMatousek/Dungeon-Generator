@@ -62,7 +62,7 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
 
 void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
     std::vector<Room> rooms;
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 1; i++) {
         Room room(20,20);
         room.Generate(0.2,0.3);
         rooms.emplace_back(std::move(room));
@@ -74,7 +74,7 @@ void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
         auto randomRoom = Random::PickRandomElement(rooms, g);
         auto randX = std::uniform_int_distribution(0, width - randomRoom.width);
         auto randY = std::uniform_int_distribution(0, height - randomRoom.height);
-        if(PlaceRoom(randomRoom, roomCounter + 1, randX(g), randY(g))) {
+        if(PlaceRoom(randomRoom, roomCounter + 1, randX(g), randY(g), Random::PickRandomRotation(g))) {
             roomCounter++;
         }
     }
@@ -204,17 +204,36 @@ void Dungeon::Blur(int floorThreshold, int wallThreshold) {
     }
 }
 
-bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y) {
+bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation rotation) {
     bool failed = false;
     for (int col = 0; !failed && col < room.width; col++) {
         for (int row = 0; !failed && row < room.height; row++) {
+            int dcol, drow;
+            switch(rotation) {
+                case Rotation::D0:
+                    dcol = col + x;
+                    drow = row + y;
+                    break;
+                case Rotation::D90:
+                    dcol = row + y;
+                    drow = room.width - 1 - col + x;
+                    break;
+                case Rotation::D180:
+                    dcol = room.width - 1 - col + x;
+                    drow = room.height - 1 - row + y;
+                    break;
+                case Rotation::D270:
+                    dcol = room.height - 1 - row + y;
+                    drow = col + x;
+                    break;
+            }
             if(room.tiles[row][col].type == TileType::FLOOR) {
-                if(row + y > height - 2 || col + x > width - 2 || tiles[row + y][col + x].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(col + x, row + y, TileType::FLOOR, roomNumber)) {
+                if(drow > height - 2 || dcol > width - 2 || tiles[drow][dcol].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(dcol, drow, TileType::FLOOR, roomNumber)) {
                     failed = true;
                     continue;
                 }
-                tiles[row + y][col + x].type = TileType::FLOOR;
-                tiles[row + y][col + x].roomNumber = roomNumber;
+                tiles[drow][dcol].type = TileType::FLOOR;
+                tiles[drow][dcol].roomNumber = roomNumber;
             }
         }
     }

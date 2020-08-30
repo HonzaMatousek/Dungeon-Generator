@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include "Tile.h"
+#include "../Util/Constants.h"
 
 class Room;
 
@@ -25,5 +26,5 @@ public:
     int RoomFlood4(int roomNumber, TileType type, int x, int y);
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
-    bool PlaceRoom(const Room & room, int roomNumber, int x, int y);
+    bool PlaceRoom(const Room & room, int roomNumber, int x, int y, Rotation rotation);
 };
