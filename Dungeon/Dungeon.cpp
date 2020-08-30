@@ -2,7 +2,9 @@
 #include "Dungeon.h"
 #include "Room.h"
 #include "../Util/Random.h"
+#include "CaveRoom.h"
 #include <random>
+#include <memory>
 
 Dungeon::Dungeon(int width, int height) : width(width), height(height) {
     tiles.resize(height);
@@ -65,25 +67,25 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
     }
 }
 
-void Dungeon::Generate(double minRoomRatio, double maxRoomRatio) {
+void Dungeon::GenerateDungeon() {
     auto r = std::random_device();
     auto g = std::mt19937(r());
-    Room initialRoom(30,30);
-    initialRoom.Generate(0.3, 0.4);
-    while(!PlaceRoom(initialRoom, 1, (width - initialRoom.width) / 2, (height - initialRoom.height) / 2, Random::PickRandomRotation(g))) {
-        initialRoom.Generate(0.3, 0.4);
+    std::unique_ptr<Room> initialRoom = std::make_unique<CaveRoom>(30,30);
+    initialRoom->Generate(0.3, 0.4);
+    while(!PlaceRoom(*initialRoom, 1, (width - initialRoom->width) / 2, (height - initialRoom->height) / 2, Random::PickRandomRotation(g))) {
+        initialRoom->Generate(0.3, 0.4);
     }
     int roomCounter = 1;
     while(roomCounter < 30) {
-        Room otherRoom(20, 20);
-        otherRoom.Generate(0.1, 0.3);
+        std::unique_ptr<Room> otherRoom = std::make_unique<CaveRoom>(20,20);
+        otherRoom->Generate(0.1, 0.3);
         bool success = false;
         for(const auto & door : doors) {
-            for(const auto & otherRoomDoor : otherRoom.doors) {
+            for(const auto & otherRoomDoor : otherRoom->doors) {
                 Rotation otherRotation = Random::PickRandomRotation(g);
                 int dx, dy;
-                TransformCoords(otherRoomDoor.x, otherRoomDoor.y, otherRoom.width, otherRoom.height, otherRotation, dx, dy);
-                if(PlaceRoom(otherRoom, roomCounter + 1, door.x - dx, door.y - dy, otherRotation)) {
+                TransformCoords(otherRoomDoor.x, otherRoomDoor.y, otherRoom->width, otherRoom->height, otherRotation, dx, dy);
+                if(PlaceRoom(*otherRoom, roomCounter + 1, door.x - dx, door.y - dy, otherRotation)) {
                     roomCounter++;
                     success = true;
                     break;

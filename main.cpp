@@ -4,7 +4,7 @@
 
 int main() {
     Dungeon dungeon(220, 45);
-    dungeon.Generate();
+    dungeon.GenerateDungeon();
     dungeon.Print();
     //Room room(30, 30);
     //room.Generate(0.0,0.1);
