@@ -23,7 +23,7 @@ protected:
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) const;
 public:
     Dungeon(int width, int height);
-    void GenerateDungeon();
+    void GenerateDungeon(std::mt19937 & gen);
     void Print() const;
 
     int CountNeighbors8(const TileCoord & tileCoord, TileType type, bool CountEdge = false) const;

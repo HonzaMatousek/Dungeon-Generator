@@ -1,13 +1,11 @@
 #include "RectangleRoom.h"
 
-void RectangleRoom::Generate(double minRoomRatio, double maxRoomRatio) {
-    auto r = std::random_device();
-    auto g = std::mt19937(r());
+void RectangleRoom::Generate(double minRoomRatio, double maxRoomRatio, std::mt19937 & gen) {
     bool success = false;
     while(!success) {
         Reset();
-        int roomW = std::uniform_int_distribution(0, width - 2)(g);
-        int roomH = std::uniform_int_distribution(0, height - 2)(g);
+        int roomW = std::uniform_int_distribution(0, width - 2)(gen);
+        int roomH = std::uniform_int_distribution(0, height - 2)(gen);
         if((roomW < 2 && roomH < 2) || roomW * roomH < (width - 2) * (height - 2) * minRoomRatio || roomW * roomH > (width - 2) * (height - 2) * maxRoomRatio) {
             continue;
         }
@@ -20,7 +18,7 @@ void RectangleRoom::Generate(double minRoomRatio, double maxRoomRatio) {
                 tiles[row][col].roomNumber = 1;
             }
         }
-        GenerateDoors(std::sqrt(roomW * roomH), g);
+        GenerateDoors(std::sqrt(roomW * roomH), gen);
     }
 }
 

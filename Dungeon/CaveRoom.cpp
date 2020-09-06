@@ -1,12 +1,10 @@
 #include "CaveRoom.h"
 
-void CaveRoom::Generate(double minRoomRatio, double maxRoomRatio) {
+void CaveRoom::Generate(double minRoomRatio, double maxRoomRatio, std::mt19937 & gen) {
     bool success = false;
     doors.clear();
     while(!success) {
-        auto r = std::random_device();
-        auto g = std::mt19937(r());
-        Noise(g);
+        Noise(gen);
         for (int i = 0; i < 2; i++) {
             Blur(4, 4);
         }
@@ -36,7 +34,7 @@ void CaveRoom::Generate(double minRoomRatio, double maxRoomRatio) {
                     tile.type = TileType::WALL;
                 }
             });
-            GenerateDoors(std::sqrt(bestRoomSize), g);
+            GenerateDoors(std::sqrt(bestRoomSize), gen);
         }
     }
 }

@@ -61,16 +61,14 @@ void Dungeon::Print() const {
     }
 }
 
-void Dungeon::GenerateDungeon() {
+void Dungeon::GenerateDungeon(std::mt19937 & gen) {
     BlobRoom mask(width, height);
-    mask.Generate(0.6, 0.7);
+    mask.Generate(0.6, 0.7, gen);
     WalkTiles([&](const TileCoord & tileCoord) {
         if(mask.at(tileCoord).type == TileType::WALL) {
             //at(tileCoord).type = TileType::MASK;
         }
     });
-    auto r = std::random_device();
-    auto g = std::mt19937(r());
     RoomProvider roomProvider;
     roomProvider.RegisterRoom(std::make_unique<CaveRoom>(10, 10));
     roomProvider.RegisterRoom(std::make_unique<CaveRoom>(20, 20));
@@ -82,24 +80,24 @@ void Dungeon::GenerateDungeon() {
     roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(20, 20));
     roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(30, 30));
     while(true) {
-        auto initialRoom = roomProvider.RandomRoom(g);
-        initialRoom->Generate(0.3, 0.4);
+        auto initialRoom = roomProvider.RandomRoom(gen);
+        initialRoom->Generate(0.3, 0.4, gen);
         auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
         auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
-        if (PlaceRoom(*initialRoom, 1, { randomx(g), randomy(g) }, Random::PickRandomRotation(g))) {
+        if (PlaceRoom(*initialRoom, 1, { randomx(gen), randomy(gen) }, Random::PickRandomRotation(gen))) {
             break;
         }
     }
     int roomCounter = 1;
     for(int tryCounter = 0; roomCounter < 50 && tryCounter < 30000; tryCounter++) {
-        auto otherRoom = roomProvider.RandomRoom(g);
-        otherRoom->Generate(0.1, 0.3);
+        auto otherRoom = roomProvider.RandomRoom(gen);
+        otherRoom->Generate(0.1, 0.3, gen);
         bool success = false;
-        const auto & door = Random::PickRandomElement(doors, g);
+        const auto & door = Random::PickRandomElement(doors, gen);
         /*for(const auto & door : doors)*/ {
             if(at(door).roomNumber == -1) continue;
             for(const auto & otherRoomDoor : otherRoom->doors) {
-                Rotation otherRotation = Random::PickRandomRotation(g);
+                Rotation otherRotation = Random::PickRandomRotation(gen);
                 TileCoord d = otherRoomDoor.Transform(*otherRoom, otherRotation);
                 if(PlaceRoom(*otherRoom, roomCounter + 1, door - d, otherRotation)) {
                     roomCounter++;
@@ -115,7 +113,7 @@ void Dungeon::GenerateDungeon() {
     }
     int corridorCounter = 0;
     for(int tryCounter = 0; corridorCounter < 0 && tryCounter < 10000; tryCounter++) {
-        const auto & door = Random::PickRandomElement(doors, g);
+        const auto & door = Random::PickRandomElement(doors, gen);
         if(CountNeighbors4(door, TileType::FLOOR) > 1) continue;
         int room1 = door.y < height - 1 ? tiles[door.y+1][door.x].roomNumber : 0;
         int room2 = door.y > 0 ? tiles[door.y-1][door.x].roomNumber : 0;
@@ -123,9 +121,9 @@ void Dungeon::GenerateDungeon() {
         int room4 = door.x > 0 ? tiles[door.y][door.x-1].roomNumber : 0;
         int roomNumber = (room1 > 0) ? room1 : (room2 > 0) ? room2 : (room3 > 0) ? room3 : room4;
         auto randomDirection = std::uniform_int_distribution(0,1);
-        int diffX = randomDirection(g) ? 1 : -1;
+        int diffX = randomDirection(gen) ? 1 : -1;
         int diffY = 0;
-        if(randomDirection(g)) {
+        if(randomDirection(gen)) {
             std::swap(diffX, diffY);
         }
         bool success = false;
@@ -180,8 +178,8 @@ void Dungeon::GenerateDungeon() {
     furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
     furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
     for(int i = 0; i < roomCounter; i++) {
-        std::unique_ptr<FurnitureStyle> furnitureStyle = furnitureProvider.RandomFurnitureStyle(g);
-        furnitureStyle->FurnitureRoom(*this, i, g);
+        std::unique_ptr<FurnitureStyle> furnitureStyle = furnitureProvider.RandomFurnitureStyle(gen);
+        furnitureStyle->FurnitureRoom(*this, i, gen);
     }
 }
 
