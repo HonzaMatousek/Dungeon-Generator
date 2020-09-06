@@ -4,6 +4,7 @@ enum class TileType {
     WALL = 0,
     FLOOR = 1,
     DOOR = 2,
+    MASK = 3,
 };
 
 class Tile {

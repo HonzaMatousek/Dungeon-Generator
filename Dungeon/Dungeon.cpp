@@ -4,6 +4,7 @@
 #include "../Util/Random.h"
 #include "CaveRoom.h"
 #include "RectangleRoom.h"
+#include "BlobRoom.h"
 #include <random>
 #include <memory>
 #include <set>
@@ -68,11 +69,22 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
 }
 
 void Dungeon::GenerateDungeon() {
+    BlobRoom mask(width, height);
+    mask.Generate(0.4, 0.7);
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            if(mask.tiles[row][col].type == TileType::WALL) {
+                tiles[row][col].type = TileType::MASK;
+            }
+        }
+    }
     auto r = std::random_device();
     auto g = std::mt19937(r());
     std::unique_ptr<Room> initialRoom = std::make_unique<CaveRoom>(30,30);
     initialRoom->Generate(0.3, 0.4);
-    while(!PlaceRoom(*initialRoom, 1, (width - initialRoom->width) / 2, (height - initialRoom->height) / 2, Random::PickRandomRotation(g))) {
+    auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
+    auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
+    while(!PlaceRoom(*initialRoom, 1, randomx(g), randomy(g), Random::PickRandomRotation(g))) {
         initialRoom->Generate(0.3, 0.4);
     }
     int roomCounter = 1;
@@ -159,6 +171,13 @@ void Dungeon::GenerateDungeon() {
         else {
             tiles[door.y][door.x].type = TileType::DOOR;
             tiles[door.y][door.x].roomNumber = 0;
+        }
+    }
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            if(tiles[row][col].type == TileType::MASK) {
+                tiles[row][col].type = TileType::WALL;
+            }
         }
     }
 }
@@ -305,7 +324,7 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation
             dcol += x;
             drow += y;
             if(room.tiles[row][col].type == TileType::FLOOR) {
-                if(drow > height - 2 || dcol > width - 2 || drow < 1 || dcol < 1 || tiles[drow][dcol].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(dcol, drow, TileType::FLOOR, roomNumber)) {
+                if(drow > height - 2 || dcol > width - 2 || drow < 1 || dcol < 1 || tiles[drow][dcol].type == TileType::FLOOR || CountNeighbors8OfOtherRoom(dcol, drow, TileType::FLOOR, roomNumber) || tiles[drow][dcol].type == TileType::MASK) {
                     failed = true;
                     continue;
                 }
