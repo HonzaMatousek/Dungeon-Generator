@@ -107,7 +107,7 @@ void Dungeon::GenerateDungeon() {
         initialRoom->Generate(0.3, 0.4);
         auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
         auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
-        if (PlaceRoom(*initialRoom, 1, randomx(g), randomy(g), Random::PickRandomRotation(g))) {
+        if (PlaceRoom(*initialRoom, 1, { randomx(g), randomy(g) }, Random::PickRandomRotation(g))) {
             break;
         }
     }
@@ -118,18 +118,18 @@ void Dungeon::GenerateDungeon() {
         bool success = false;
         const auto & door = Random::PickRandomElement(doors, g);
         /*for(const auto & door : doors)*/ {
-            if(tiles[door.y][door.x].roomNumber == -1) continue;
+            if(at(door).roomNumber == -1) continue;
             for(const auto & otherRoomDoor : otherRoom->doors) {
                 Rotation otherRotation = Random::PickRandomRotation(g);
                 TileCoord d = otherRoomDoor.Transform(*otherRoom, otherRotation);
-                if(PlaceRoom(*otherRoom, roomCounter + 1, door.x - d.x, door.y - d.y, otherRotation)) {
+                if(PlaceRoom(*otherRoom, roomCounter + 1, door - d, otherRotation)) {
                     roomCounter++;
                     success = true;
                     break;
                 }
             }
             if(success) {
-                tiles[door.y][door.x].roomNumber = -1;
+                at(door).roomNumber = -1;
                 //break;
             }
         }
@@ -183,11 +183,11 @@ void Dungeon::GenerateDungeon() {
         if(door.x < width - 1  && tiles[door.y][door.x+1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x+1].roomNumber); }
         if(door.x > 0          && tiles[door.y][door.x-1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x-1].roomNumber); }
         if(neighbors.size() <= 1) {
-            tiles[door.y][door.x].roomNumber = 0;
+            at(door).roomNumber = 0;
         }
         else {
-            tiles[door.y][door.x].type = TileType::DOOR;
-            tiles[door.y][door.x].roomNumber = 0;
+            at(door).type = TileType::DOOR;
+            at(door).roomNumber = 0;
         }
     }
     for (int row = 0; row < height; row++) {
@@ -350,13 +350,11 @@ void Dungeon::Blur(int floorThreshold, int wallThreshold) {
     }
 }
 
-bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation rotation) {
+bool Dungeon::PlaceRoom(const Room &room, int roomNumber, TileCoord position, Rotation rotation) {
     bool failed = false;
     for (int col = 0; !failed && col < room.width; col++) {
         for (int row = 0; !failed && row < room.height; row++) {
-            auto d = TileCoord{col, row}.Transform(room, rotation);
-            d.x += x;
-            d.y += y;
+            auto d = TileCoord{col, row}.Transform(room, rotation) + position;
             if(room.tiles[row][col].type == TileType::FLOOR) {
                 if(d.y > height - 2 || d.x > width - 2 || d.y < 1 || d.x < 1 || at(d).type == TileType::FLOOR || CountNeighbors8OfOtherRoom(d.x, d.y, TileType::FLOOR, roomNumber) || at(d).type == TileType::MASK) {
                     failed = true;
@@ -379,10 +377,7 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation
     }
     else {
         for(auto const & door : room.doors) {
-            auto d = door.Transform(room, rotation);
-            d.x += x;
-            d.y += y;
-            doors.push_back(d);
+            doors.push_back(door.Transform(room, rotation) + position);
         }
     }
     return !failed;

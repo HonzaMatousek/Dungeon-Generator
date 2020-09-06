@@ -19,4 +19,14 @@ struct TileCoord {
 
     [[ nodiscard ]]
     TileCoord Transform(const Dungeon & dungeon, Rotation rotation) const;
+
+    [[ nodiscard ]]
+    TileCoord operator + (const TileCoord & rhs) const {
+        return { x + rhs.x, y + rhs.y };
+    }
+
+    [[ nodiscard ]]
+    TileCoord operator - (const TileCoord & rhs) const {
+        return { x - rhs.x, y - rhs.y };
+    }
 };

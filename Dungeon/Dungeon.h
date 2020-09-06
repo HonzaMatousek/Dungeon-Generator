@@ -31,7 +31,7 @@ public:
     void Reset();
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
-    bool PlaceRoom(const Room & room, int roomNumber, int x, int y, Rotation rotation);
+    bool PlaceRoom(const Room & room, int roomNumber, TileCoord position, Rotation rotation);
 
     [[ nodiscard ]]
     Tile & at(int x, int y);
