@@ -71,11 +71,11 @@ void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roo
 
 void Dungeon::GenerateDungeon() {
     BlobRoom mask(width, height);
-    mask.Generate(0.4, 0.7);
+    mask.Generate(0.6, 0.7);
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             if(mask.tiles[row][col].type == TileType::WALL) {
-                tiles[row][col].type = TileType::MASK;
+                //tiles[row][col].type = TileType::MASK;
             }
         }
     }
