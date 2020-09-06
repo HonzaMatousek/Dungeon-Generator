@@ -25,10 +25,18 @@ public:
     int CountNeighbors4(int x, int y, TileType type, bool CountEdge = false) const;
     bool FindTile(int roomNumber, TileType type, int & x, int & y) const;
     bool FindRandomTile(int roomNumber, TileType type, int & x, int & y, std::mt19937 & gen) const;
+    bool FindRandomTileNearEdge(int roomNumber, TileType type, int & x, int & y, std::mt19937 & gen) const;
+    size_t CountRoomTiles(int roomNumber, TileType type) const;
     int RoomFlood4(int roomNumber, TileType type, int x, int y);
     void Reset();
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
     bool PlaceRoom(const Room & room, int roomNumber, int x, int y, Rotation rotation);
     static void TransformCoords(int x, int y, int width, int height, Rotation rotation, int & outX, int & outY);
+
+    [[ nodiscard ]]
+    Tile & at(int x, int y);
+
+    [[ nodiscard ]]
+    const Tile & at(int x, int y) const;
 };

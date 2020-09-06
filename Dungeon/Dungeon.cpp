@@ -6,6 +6,8 @@
 #include "RectangleRoom.h"
 #include "BlobRoom.h"
 #include "RoomProvider.h"
+#include "../Furniture/FurnitureStyle.h"
+#include "../Furniture/MonsterFurniture.h"
 #include <random>
 #include <memory>
 #include <set>
@@ -43,6 +45,12 @@ void Dungeon::Print() const {
                     break;
                 case TileType::DOOR:
                     std::cout << '#';
+                    break;
+                case TileType::MONSTER:
+                    std::cout << "☻";
+                    break;
+                case TileType::CHEST:
+                    std::cout << 'C';
                     break;
             }
         }
@@ -187,6 +195,10 @@ void Dungeon::GenerateDungeon() {
             }
         }
     }
+    for(int i = 0; i < roomCounter; i++) {
+        std::unique_ptr<FurnitureStyle> furnitureStyle = std::make_unique<MonsterFurniture>();
+        furnitureStyle->FurnitureRoom(*this, i, g);
+    }
 }
 
 int Dungeon::CountNeighbors8(int x, int y, TileType type, bool CountEdge) const {
@@ -261,7 +273,26 @@ int Dungeon::CountNeighbors4(int x, int y, TileType type, bool CountEdge) const 
     return result;
 }
 
-bool Dungeon::FindRandomTile(int roomNumber, TileType type, int &x, int &y, std::mt19937 & gen) const {
+bool Dungeon::FindRandomTile(int roomNumber, TileType type, int &x, int &y, std::mt19937 &gen) const {
+    std::vector<std::pair<int, int>> roomTiles;
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type) {
+                roomTiles.push_back({col, row});
+            }
+        }
+    }
+    if(roomTiles.empty()) {
+        return false;
+    }
+    auto d = std::uniform_int_distribution<size_t>(0, roomTiles.size() - 1);
+    auto & tile = roomTiles[d(gen)];
+    x = tile.first;
+    y = tile.second;
+    return true;
+}
+
+bool Dungeon::FindRandomTileNearEdge(int roomNumber, TileType type, int &x, int &y, std::mt19937 & gen) const {
     std::vector<std::pair<int, int>> roomTiles;
     for (int col = 0; col < width; col++) {
         for (int row = 0; row < height; row++) {
@@ -381,4 +412,24 @@ void Dungeon::TransformCoords(int x, int y, int width, int height, Rotation rota
             outY = x;
             break;
     }
+}
+
+size_t Dungeon::CountRoomTiles(int roomNumber, TileType type) const {
+    size_t result = 0;
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            if(tiles[row][col].type == type && tiles[row][col].roomNumber == roomNumber) {
+                result++;
+            }
+        }
+    }
+    return result;
+}
+
+Tile &Dungeon::at(int x, int y) {
+    return tiles[y][x];
+}
+
+const Tile &Dungeon::at(int x, int y) const {
+    return tiles[y][x];
 }
