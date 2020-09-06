@@ -4,6 +4,7 @@
 
 int main() {
     Dungeon dungeon(220, 45);
+    //Dungeon dungeon(350, 100);
     dungeon.GenerateDungeon();
     dungeon.Print();
     //Room room(30, 30);

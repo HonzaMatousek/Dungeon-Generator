@@ -23,16 +23,11 @@ void Dungeon::Print() const {
         for (int col = 0; col < width; col++) {
             switch(tiles[row][col].type) {
                 case TileType::WALL:
-                    if(CountNeighbors4(col, row, TileType::WALL, true) > 3) {
+                    if(CountNeighbors8(col, row, TileType::WALL, true) > 7) {
                         std::cout << ' ';
                     }
                     else {
-                        if(tiles[row][col].roomNumber == -1) {
-                            std::cout << "#";
-                        }
-                        else {
-                            std::cout << "█";
-                        }
+                        std::cout << "█";
                     }
                     break;
                 case TileType::FLOOR:
@@ -43,6 +38,9 @@ void Dungeon::Print() const {
                     else {
                         std::cout << "\033[38;5;" << (30 + (tiles[row][col].roomNumber % 200)) << "m.\033[0m";
                     }
+                    break;
+                case TileType::DOOR:
+                    std::cout << '#';
                     break;
             }
         }
@@ -78,17 +76,18 @@ void Dungeon::GenerateDungeon() {
         initialRoom->Generate(0.3, 0.4);
     }
     int roomCounter = 1;
-    for(int tryCounter = 0; roomCounter < 40 && tryCounter < 10000; tryCounter++) {
+    for(int tryCounter = 0; roomCounter < 2000 && tryCounter < 30000; tryCounter++) {
         std::unique_ptr<Room> otherRoom;
         if(std::uniform_int_distribution(0,1)(g)) {
             otherRoom = std::make_unique<CaveRoom>(20, 20);
         }
         else {
-            otherRoom = std::make_unique<RectangleRoom>(20, 20);
+            otherRoom = std::make_unique<RectangleRoom>(15, 15);
         }
         otherRoom->Generate(0.1, 0.3);
         bool success = false;
-        for(const auto & door : doors) {
+        const auto & door = Random::PickRandomElement(doors, g);
+        /*for(const auto & door : doors)*/ {
             if(tiles[door.y][door.x].roomNumber == -1) continue;
             for(const auto & otherRoomDoor : otherRoom->doors) {
                 Rotation otherRotation = Random::PickRandomRotation(g);
@@ -102,12 +101,12 @@ void Dungeon::GenerateDungeon() {
             }
             if(success) {
                 tiles[door.y][door.x].roomNumber = -1;
-                break;
+                //break;
             }
         }
     }
     int corridorCounter = 0;
-    for(int tryCounter = 0; corridorCounter < 10 && tryCounter < 10000; tryCounter++) {
+    for(int tryCounter = 0; corridorCounter < 0 && tryCounter < 10000; tryCounter++) {
         const auto & door = Random::PickRandomElement(doors, g);
         if(CountNeighbors4(door.x, door.y, TileType::FLOOR) > 1) continue;
         int room1 = door.y < height - 1 ? tiles[door.y+1][door.x].roomNumber : 0;
@@ -158,7 +157,8 @@ void Dungeon::GenerateDungeon() {
             tiles[door.y][door.x].roomNumber = 0;
         }
         else {
-            tiles[door.y][door.x].roomNumber = -1;
+            tiles[door.y][door.x].type = TileType::DOOR;
+            tiles[door.y][door.x].roomNumber = 0;
         }
     }
 }
