@@ -17,7 +17,7 @@ void CaveRoom::Generate(double minRoomRatio, double maxRoomRatio) {
             int bestRoomNumber = 0;
             while(TileCoord find = FindTile(0, TileType::FLOOR)) {
                 roomCounter++;
-                int roomSize = RoomFlood4(roomCounter, TileType::FLOOR, find.x, find.y);
+                int roomSize = RoomFlood4(roomCounter, TileType::FLOOR, find);
                 if (roomSize > bestRoomSize && roomSize < maxRoomSize) {
                     bestRoomSize = roomSize;
                     bestRoomNumber = roomCounter;
@@ -29,15 +29,13 @@ void CaveRoom::Generate(double minRoomRatio, double maxRoomRatio) {
             else {
                 success = true;
             }
-            for (int row = 0; row < height; row++) {
-                for (int col = 0; col < width; col++) {
-                    auto &tile = tiles[row][col];
-                    if (tile.roomNumber != bestRoomNumber && tile.type == TileType::FLOOR) {
-                        tile.roomNumber = 0;
-                        tile.type = TileType::WALL;
-                    }
+            WalkTiles([&](const TileCoord & tileCoord) {
+                auto &tile = at(tileCoord);
+                if (tile.roomNumber != bestRoomNumber && tile.type == TileType::FLOOR) {
+                    tile.roomNumber = 0;
+                    tile.type = TileType::WALL;
                 }
-            }
+            });
             GenerateDoors(std::sqrt(bestRoomSize), g);
         }
     }

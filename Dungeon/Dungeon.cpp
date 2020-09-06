@@ -30,7 +30,7 @@ void Dungeon::Print() const {
         for (int col = 0; col < width; col++) {
             switch(tiles[row][col].type) {
                 case TileType::WALL:
-                    if(CountNeighbors8(col, row, TileType::WALL, true) > 7) {
+                    if(CountNeighbors8({ col, row }, TileType::WALL, true) > 7) {
                         std::cout << ' ';
                     }
                     else {
@@ -135,7 +135,7 @@ void Dungeon::GenerateDungeon() {
     int corridorCounter = 0;
     for(int tryCounter = 0; corridorCounter < 0 && tryCounter < 10000; tryCounter++) {
         const auto & door = Random::PickRandomElement(doors, g);
-        if(CountNeighbors4(door.x, door.y, TileType::FLOOR) > 1) continue;
+        if(CountNeighbors4(door, TileType::FLOOR) > 1) continue;
         int room1 = door.y < height - 1 ? tiles[door.y+1][door.x].roomNumber : 0;
         int room2 = door.y > 0 ? tiles[door.y-1][door.x].roomNumber : 0;
         int room3 = door.x < width - 1 ? tiles[door.y][door.x+1].roomNumber : 0;
@@ -149,10 +149,10 @@ void Dungeon::GenerateDungeon() {
         }
         bool success = false;
         for(int x = door.x, y = door.y; x > 0 && y > 0 && x < width - 1 && y < height - 1; x += diffX, y += diffY) {
-            if(CountNeighbors8OfSameRoom(x, y, TileType::FLOOR, 0) > 3) {
+            if(CountNeighbors8OfSameRoom({ x, y }, TileType::FLOOR, 0) > 3) {
                 break;
             }
-            if(CountNeighbors8(x, y, TileType::FLOOR) > 4) {
+            if(CountNeighbors8({ x, y }, TileType::FLOOR) > 4) {
                 break;
             }
             if(tiles[y][x].type == TileType::FLOOR && tiles[y][x].roomNumber != roomNumber) {
@@ -204,8 +204,10 @@ void Dungeon::GenerateDungeon() {
     }
 }
 
-int Dungeon::CountNeighbors8(int x, int y, TileType type, bool CountEdge) const {
+int Dungeon::CountNeighbors8(const TileCoord & tileCoord, TileType type, bool CountEdge) const {
     int result = 0;
+    int x = tileCoord.x;
+    int y = tileCoord.y;
     if(y > 0          && x > 0)         result += (tiles[y-1][x-1].type == type); else result += CountEdge;
     if(y > 0)                           result += (tiles[y-1][x  ].type == type); else result += CountEdge;
     if(y > 0          && x < width - 1) result += (tiles[y-1][x+1].type == type); else result += CountEdge;
@@ -217,8 +219,10 @@ int Dungeon::CountNeighbors8(int x, int y, TileType type, bool CountEdge) const 
     return result;
 }
 
-int Dungeon::CountNeighbors8OfSameRoom(int x, int y, TileType type, int roomNumber, bool CountEdge) const {
+int Dungeon::CountNeighbors8OfSameRoom(const TileCoord & tileCoord, TileType type, int roomNumber, bool CountEdge) const {
     int result = 0;
+    int x = tileCoord.x;
+    int y = tileCoord.y;
     if(y > 0          && x > 0)         result += (tiles[y-1][x-1].type == type && tiles[y-1][x-1].roomNumber == roomNumber); else result += CountEdge;
     if(y > 0)                           result += (tiles[y-1][x  ].type == type && tiles[y-1][x  ].roomNumber == roomNumber); else result += CountEdge;
     if(y > 0          && x < width - 1) result += (tiles[y-1][x+1].type == type && tiles[y-1][x+1].roomNumber == roomNumber); else result += CountEdge;
@@ -230,8 +234,10 @@ int Dungeon::CountNeighbors8OfSameRoom(int x, int y, TileType type, int roomNumb
     return result;
 }
 
-int Dungeon::CountNeighbors8OfOtherRoom(int x, int y, TileType type, int roomNumber, bool CountEdge) const {
+int Dungeon::CountNeighbors8OfOtherRoom(const TileCoord & tileCoord, TileType type, int roomNumber, bool CountEdge) const {
     int result = 0;
+    int x = tileCoord.x;
+    int y = tileCoord.y;
     if(y > 0          && x > 0)         result += (tiles[y-1][x-1].type == type && tiles[y-1][x-1].roomNumber != roomNumber); else result += CountEdge;
     if(y > 0)                           result += (tiles[y-1][x  ].type == type && tiles[y-1][x  ].roomNumber != roomNumber); else result += CountEdge;
     if(y > 0          && x < width - 1) result += (tiles[y-1][x+1].type == type && tiles[y-1][x+1].roomNumber != roomNumber); else result += CountEdge;
@@ -243,19 +249,23 @@ int Dungeon::CountNeighbors8OfOtherRoom(int x, int y, TileType type, int roomNum
     return result;
 }
 
-int Dungeon::RoomFlood4(int roomNumber, TileType type, int x, int y) {
+int Dungeon::RoomFlood4(int roomNumber, TileType type, const TileCoord & tileCoord) {
+    int x = tileCoord.x;
+    int y = tileCoord.y;
     if(tiles[y][x].roomNumber == roomNumber || tiles[y][x].type != type) return 0;
     tiles[y][x].roomNumber = roomNumber;
     int result = 1;
-    if(y > 0)          result += RoomFlood4(roomNumber, type, x, y - 1);
-    if(y < height - 1) result += RoomFlood4(roomNumber, type, x, y + 1);
-    if(x > 0)          result += RoomFlood4(roomNumber, type, x - 1, y);
-    if(x < width - 1)  result += RoomFlood4(roomNumber, type, x + 1, y);
+    if(y > 0)          result += RoomFlood4(roomNumber, type, { x, y - 1 });
+    if(y < height - 1) result += RoomFlood4(roomNumber, type, { x, y + 1 });
+    if(x > 0)          result += RoomFlood4(roomNumber, type, { x - 1, y });
+    if(x < width - 1)  result += RoomFlood4(roomNumber, type, { x + 1, y });
     return result;
 }
 
-int Dungeon::CountNeighbors4(int x, int y, TileType type, bool CountEdge) const {
+int Dungeon::CountNeighbors4(const TileCoord & tileCoord, TileType type, bool CountEdge) const {
     int result = 0;
+    int x = tileCoord.x;
+    int y = tileCoord.y;
     if(y > 0)                           result += (tiles[y-1][x  ].type == type); else result += CountEdge;
     if(                  x > 0)         result += (tiles[y  ][x-1].type == type); else result += CountEdge;
     if(                  x < width - 1) result += (tiles[y  ][x+1].type == type); else result += CountEdge;
@@ -290,7 +300,7 @@ TileCoord Dungeon::FindRandomTile(int roomNumber, TileType type, std::mt19937 &g
 TileCoord Dungeon::FindRandomTileNearEdge(int roomNumber, TileType type, std::mt19937 & gen) const {
     std::vector<TileCoord> roomTiles;
     WalkTiles([&](const TileCoord & tileCoord) {
-        if(at(tileCoord).roomNumber == roomNumber && at(tileCoord).type == type && CountNeighbors4(tileCoord.x, tileCoord.y, type, true) < 4) {
+        if(at(tileCoord).roomNumber == roomNumber && at(tileCoord).type == type && CountNeighbors4(tileCoord, type, true) < 4) {
             roomTiles.push_back(tileCoord);
         }
     });
@@ -324,11 +334,11 @@ void Dungeon::Blur(int floorThreshold, int wallThreshold) {
     WalkTiles([&](const TileCoord & tileCoord) {
         switch(at(tileCoord).type) {
             case TileType::WALL:
-                if(CountNeighbors8(tileCoord.x, tileCoord.y, TileType::FLOOR) > floorThreshold) {
+                if(CountNeighbors8(tileCoord, TileType::FLOOR) > floorThreshold) {
                     at(tileCoord).type = TileType::FLOOR;
                 }
             case TileType::FLOOR:
-                if(CountNeighbors8(tileCoord.x, tileCoord.y, TileType::WALL) > wallThreshold) {
+                if(CountNeighbors8(tileCoord, TileType::WALL) > wallThreshold) {
                     at(tileCoord).type = TileType::WALL;
                 }
                 break;
@@ -342,7 +352,7 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, TileCoord position, Ro
     bool failed = !room.WalkTilesChecked([&](const TileCoord & tileCoord) {
         auto d = tileCoord.Transform(room, rotation) + position;
         if(room.at(tileCoord).type == TileType::FLOOR) {
-            if(d.y > height - 2 || d.x > width - 2 || d.y < 1 || d.x < 1 || at(d).type == TileType::FLOOR || CountNeighbors8OfOtherRoom(d.x, d.y, TileType::FLOOR, roomNumber) || at(d).type == TileType::MASK) {
+            if(d.y > height - 2 || d.x > width - 2 || d.y < 1 || d.x < 1 || at(d).type == TileType::FLOOR || CountNeighbors8OfOtherRoom(d, TileType::FLOOR, roomNumber) || at(d).type == TileType::MASK) {
                 return false;
             }
             at(d).type = TileType::FLOOR;
