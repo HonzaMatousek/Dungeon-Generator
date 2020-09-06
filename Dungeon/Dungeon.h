@@ -32,7 +32,6 @@ public:
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
     bool PlaceRoom(const Room & room, int roomNumber, int x, int y, Rotation rotation);
-    static void TransformCoords(int x, int y, int width, int height, Rotation rotation, int & outX, int & outY);
 
     [[ nodiscard ]]
     Tile & at(int x, int y);
@@ -45,4 +44,10 @@ public:
 
     [[ nodiscard ]]
     const Tile & at(const TileCoord & tileCoord) const;
+
+    [[ nodiscard ]]
+    int getWidth() const;
+
+    [[ nodiscard ]]
+    int getHeight() const;
 };
