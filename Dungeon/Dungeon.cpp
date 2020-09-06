@@ -5,6 +5,7 @@
 #include "CaveRoom.h"
 #include "RectangleRoom.h"
 #include "BlobRoom.h"
+#include "RoomProvider.h"
 #include <random>
 #include <memory>
 #include <set>
@@ -80,22 +81,28 @@ void Dungeon::GenerateDungeon() {
     }
     auto r = std::random_device();
     auto g = std::mt19937(r());
-    std::unique_ptr<Room> initialRoom = std::make_unique<CaveRoom>(30,30);
-    initialRoom->Generate(0.3, 0.4);
-    auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
-    auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
-    while(!PlaceRoom(*initialRoom, 1, randomx(g), randomy(g), Random::PickRandomRotation(g))) {
+    RoomProvider roomProvider;
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(10, 10));
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(20, 20));
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(50, 20));
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(30, 30));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 10));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 5));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(15, 15));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(20, 20));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(30, 30));
+    while(true) {
+        auto initialRoom = roomProvider.RandomRoom(g);
         initialRoom->Generate(0.3, 0.4);
+        auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
+        auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
+        if (PlaceRoom(*initialRoom, 1, randomx(g), randomy(g), Random::PickRandomRotation(g))) {
+            break;
+        }
     }
     int roomCounter = 1;
     for(int tryCounter = 0; roomCounter < 2000 && tryCounter < 30000; tryCounter++) {
-        std::unique_ptr<Room> otherRoom;
-        if(std::uniform_int_distribution(0,1)(g)) {
-            otherRoom = std::make_unique<CaveRoom>(20, 20);
-        }
-        else {
-            otherRoom = std::make_unique<RectangleRoom>(15, 15);
-        }
+        auto otherRoom = roomProvider.RandomRoom(g);
         otherRoom->Generate(0.1, 0.3);
         bool success = false;
         const auto & door = Random::PickRandomElement(doors, g);

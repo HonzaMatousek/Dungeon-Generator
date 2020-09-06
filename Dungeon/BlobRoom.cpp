@@ -43,3 +43,7 @@ void BlobRoom::Generate(double minRoomRatio, double maxRoomRatio) {
         }
     }
 }
+
+std::unique_ptr<Room> BlobRoom::Clone() const {
+    return std::make_unique<BlobRoom>(*this);
+}

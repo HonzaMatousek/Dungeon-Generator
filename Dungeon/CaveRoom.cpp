@@ -43,3 +43,7 @@ void CaveRoom::Generate(double minRoomRatio, double maxRoomRatio) {
         }
     }
 }
+
+std::unique_ptr<Room> CaveRoom::Clone() const {
+    return std::make_unique<CaveRoom>(*this);
+}

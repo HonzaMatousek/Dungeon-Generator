@@ -23,3 +23,7 @@ void RectangleRoom::Generate(double minRoomRatio, double maxRoomRatio) {
         GenerateDoors(std::sqrt(roomW * roomH), g);
     }
 }
+
+std::unique_ptr<Room> RectangleRoom::Clone() const {
+    return std::make_unique<RectangleRoom>(*this);
+}
