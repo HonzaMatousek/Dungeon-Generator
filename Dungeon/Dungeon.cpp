@@ -93,7 +93,7 @@ void Dungeon::GenerateDungeon(std::mt19937 & gen) {
         auto otherRoom = roomProvider.RandomRoom(gen);
         otherRoom->Generate(0.1, 0.3, gen);
         bool success = false;
-        const auto & door = Random::PickRandomElement(doors, gen);
+        const auto door = Random::PickRandomElement(doors, gen);
         /*for(const auto & door : doors)*/ {
             if(at(door).roomNumber == -1) continue;
             for(const auto & otherRoomDoor : otherRoom->doors) {
