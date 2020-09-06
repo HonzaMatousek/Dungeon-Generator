@@ -101,7 +101,7 @@ void Dungeon::GenerateDungeon() {
         }
     }
     int roomCounter = 1;
-    for(int tryCounter = 0; roomCounter < 2000 && tryCounter < 30000; tryCounter++) {
+    for(int tryCounter = 0; roomCounter < 50 && tryCounter < 30000; tryCounter++) {
         auto otherRoom = roomProvider.RandomRoom(g);
         otherRoom->Generate(0.1, 0.3);
         bool success = false;
