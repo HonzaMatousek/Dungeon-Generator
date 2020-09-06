@@ -61,25 +61,6 @@ void Dungeon::Print() const {
     }
 }
 
-void ConnectTwoRooms(int source, int target, std::vector<std::vector<int>> & roomConnections) {
-    for(int i = 1; i < roomConnections.size(); i++) {
-        // create connections between 2 rooms
-        roomConnections[target][source] = 1;
-        roomConnections[source][target] = 1;
-        // mark all connected rooms as connected to the other room
-        roomConnections[source][i] |= roomConnections[target][i];
-        roomConnections[i][source] |= roomConnections[i][target];
-        roomConnections[target][i] |= roomConnections[source][i];
-        roomConnections[i][target] |= roomConnections[i][source];
-    }
-    for(int i = 1; i < roomConnections.size(); i++) {
-        roomConnections[i][0] = 0;
-        for (int j = 1; j < roomConnections.size(); j++) {
-            roomConnections[i][0] += roomConnections[i][j];
-        }
-    }
-}
-
 void Dungeon::GenerateDungeon() {
     BlobRoom mask(width, height);
     mask.Generate(0.6, 0.7);
