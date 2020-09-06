@@ -10,3 +10,7 @@ void MonsterFurniture::FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19
         }
     }
 }
+
+std::unique_ptr<FurnitureStyle> MonsterFurniture::Clone() const {
+    return std::make_unique<MonsterFurniture>(*this);
+}

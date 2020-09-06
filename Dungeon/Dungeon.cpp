@@ -8,6 +8,9 @@
 #include "RoomProvider.h"
 #include "../Furniture/FurnitureStyle.h"
 #include "../Furniture/MonsterFurniture.h"
+#include "../Furniture/FurnitureProvider.h"
+#include "../Furniture/EmptyFurniture.h"
+#include "../Furniture/ChestFurniture.h"
 #include <random>
 #include <memory>
 #include <set>
@@ -50,7 +53,7 @@ void Dungeon::Print() const {
                     std::cout << "☻";
                     break;
                 case TileType::CHEST:
-                    std::cout << 'C';
+                    std::cout << "☐";
                     break;
             }
         }
@@ -195,8 +198,13 @@ void Dungeon::GenerateDungeon() {
             }
         }
     }
+    FurnitureProvider furnitureProvider;
+    furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>());
+    furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());
+    furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
+    furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
     for(int i = 0; i < roomCounter; i++) {
-        std::unique_ptr<FurnitureStyle> furnitureStyle = std::make_unique<MonsterFurniture>();
+        std::unique_ptr<FurnitureStyle> furnitureStyle = furnitureProvider.RandomFurnitureStyle(g);
         furnitureStyle->FurnitureRoom(*this, i, g);
     }
 }
