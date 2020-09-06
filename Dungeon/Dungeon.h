@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <random>
+#include <functional>
 #include "Tile.h"
 #include "../Util/Constants.h"
 #include "../Util/TileCoord.h"
@@ -14,6 +15,12 @@ protected:
     int height;
     std::vector<std::vector<Tile>> tiles;
     std::vector<TileCoord> doors;
+    void WalkTiles(const std::function<void(const TileCoord &)> & function);
+    void WalkTiles(const std::function<void(const TileCoord &)> & function) const;
+    bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function);
+    bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function) const;
+    TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function);
+    TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) const;
 public:
     Dungeon(int width, int height);
     void GenerateDungeon();
