@@ -259,19 +259,6 @@ int Dungeon::RoomFlood4(int roomNumber, TileType type, int x, int y) {
     return result;
 }
 
-bool Dungeon::FindTile(int roomNumber, TileType type, int &x, int &y) const {
-    for (int col = 0; col < width; col++) {
-        for (int row = 0; row < height; row++) {
-            if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type) {
-                x = col;
-                y = row;
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 int Dungeon::CountNeighbors4(int x, int y, TileType type, bool CountEdge) const {
     int result = 0;
     if(y > 0)                           result += (tiles[y-1][x  ].type == type); else result += CountEdge;
@@ -281,8 +268,19 @@ int Dungeon::CountNeighbors4(int x, int y, TileType type, bool CountEdge) const 
     return result;
 }
 
-bool Dungeon::FindRandomTile(int roomNumber, TileType type, int &x, int &y, std::mt19937 &gen) const {
-    std::vector<std::pair<int, int>> roomTiles;
+TileCoord Dungeon::FindTile(int roomNumber, TileType type) const {
+    for (int col = 0; col < width; col++) {
+        for (int row = 0; row < height; row++) {
+            if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type) {
+                return { col, row };
+            }
+        }
+    }
+    return TileCoord::Invalid();
+}
+
+TileCoord Dungeon::FindRandomTile(int roomNumber, TileType type, std::mt19937 &gen) const {
+    std::vector<TileCoord> roomTiles;
     for (int col = 0; col < width; col++) {
         for (int row = 0; row < height; row++) {
             if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type) {
@@ -291,17 +289,13 @@ bool Dungeon::FindRandomTile(int roomNumber, TileType type, int &x, int &y, std:
         }
     }
     if(roomTiles.empty()) {
-        return false;
+        return TileCoord::Invalid();
     }
-    auto d = std::uniform_int_distribution<size_t>(0, roomTiles.size() - 1);
-    auto & tile = roomTiles[d(gen)];
-    x = tile.first;
-    y = tile.second;
-    return true;
+    return Random::PickRandomElement(roomTiles, gen);
 }
 
-bool Dungeon::FindRandomTileNearEdge(int roomNumber, TileType type, int &x, int &y, std::mt19937 & gen) const {
-    std::vector<std::pair<int, int>> roomTiles;
+TileCoord Dungeon::FindRandomTileNearEdge(int roomNumber, TileType type, std::mt19937 & gen) const {
+    std::vector<TileCoord> roomTiles;
     for (int col = 0; col < width; col++) {
         for (int row = 0; row < height; row++) {
             if(tiles[row][col].roomNumber == roomNumber && tiles[row][col].type == type && CountNeighbors4(col, row, type, true) < 4) {
@@ -310,13 +304,9 @@ bool Dungeon::FindRandomTileNearEdge(int roomNumber, TileType type, int &x, int 
         }
     }
     if(roomTiles.empty()) {
-        return false;
+        return TileCoord::Invalid();
     }
-    auto d = std::uniform_int_distribution<size_t>(0, roomTiles.size() - 1);
-    auto & tile = roomTiles[d(gen)];
-    x = tile.first;
-    y = tile.second;
-    return true;
+    return Random::PickRandomElement(roomTiles, gen);
 }
 
 void Dungeon::Reset() {
@@ -395,7 +385,7 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, int x, int y, Rotation
             TransformCoords(door.x, door.y, room.width, room.height, rotation, dcol, drow);
             dcol += x;
             drow += y;
-            doors.push_back({ dcol, drow, Rotation::D0 });
+            doors.push_back({ dcol, drow });
         }
     }
     return !failed;
@@ -440,4 +430,12 @@ Tile &Dungeon::at(int x, int y) {
 
 const Tile &Dungeon::at(int x, int y) const {
     return tiles[y][x];
+}
+
+Tile &Dungeon::at(const TileCoord &tileCoord) {
+    return at(tileCoord.x, tileCoord.y);
+}
+
+const Tile &Dungeon::at(const TileCoord &tileCoord) const {
+    return at(tileCoord.x, tileCoord.y);
 }

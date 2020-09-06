@@ -11,14 +11,13 @@ void BlobRoom::Generate(double minRoomRatio, double maxRoomRatio) {
             Blur(4, 5);
         }
         {
-            int findX, findY;
             int roomCounter = 0;
             int bestRoomSize = (width - 2) * (height - 2) * minRoomRatio;
             int maxRoomSize = (width - 2) * (height - 2) * maxRoomRatio;
             int bestRoomNumber = 0;
-            while (FindTile(0, TileType::FLOOR, findX, findY)) {
+            while(TileCoord find = FindTile(0, TileType::FLOOR)) {
                 roomCounter++;
-                int roomSize = RoomFlood4(roomCounter, TileType::FLOOR, findX, findY);
+                int roomSize = RoomFlood4(roomCounter, TileType::FLOOR, find.x, find.y);
                 if (roomSize > bestRoomSize && roomSize < maxRoomSize) {
                     bestRoomSize = roomSize;
                     bestRoomNumber = roomCounter;
