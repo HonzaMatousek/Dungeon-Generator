@@ -1,0 +1,20 @@
+# comments
+
+room cave 10 10 0.1 0.3
+room cave 20 20 0.1 0.3
+room cave 50 20 0.1 0.3
+room cave 30 30 0.1 0.3
+room rectangle 10 10 0.1 0.3
+room rectangle 10 5 0.1 0.3
+room rectangle 15 15 0.1 0.3
+room rectangle 20 20 0.1 0.3
+room rectangle 30 30 0.1 0.3
+
+furniture monster
+furniture chest
+furniture empty
+furniture empty
+furniture maze
+
+rooms 50
+dungeon 220 45

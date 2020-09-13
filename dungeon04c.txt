@@ -1,0 +1,13 @@
+# comments
+
+room cave 20 20 0.3 0.5
+room cave 10 20 0.3 0.5
+room cave 50 50 0.3 0.5
+
+furniture monster
+furniture maze
+
+mask blob 300 200 0.7 0.9
+
+rooms 20
+dungeon 300 200
