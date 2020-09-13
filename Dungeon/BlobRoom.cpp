@@ -1,6 +1,6 @@
 #include "BlobRoom.h"
 
-void BlobRoom::Generate(double minRoomRatio, double maxRoomRatio, std::mt19937 & gen) {
+void BlobRoom::Generate(std::mt19937 & gen) {
     bool success = false;
     doors.clear();
     while(!success) {

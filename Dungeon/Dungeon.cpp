@@ -16,7 +16,7 @@
 #include <memory>
 #include <set>
 
-Dungeon::Dungeon(int width, int height) : width(width), height(height) {
+Dungeon::Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio) : width(width), height(height), minRoomRatio(minRoomRatio), maxRoomRatio(maxRoomRatio) {
     tiles.resize(height);
     for(auto & row : tiles) {
         row.resize(width);
@@ -63,26 +63,26 @@ void Dungeon::Print() const {
 }
 
 void Dungeon::GenerateDungeon(std::mt19937 & gen) {
-    BlobRoom mask(width, height);
-    mask.Generate(0.6, 0.7, gen);
+    BlobRoom mask(width, height, 0.6, 0.7);
+    mask.Generate(gen);
     WalkTiles([&](const TileCoord & tileCoord) {
         if(mask.at(tileCoord).type == TileType::WALL) {
             //at(tileCoord).type = TileType::MASK;
         }
     });
     RoomProvider roomProvider;
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(10, 10));
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(20, 20));
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(50, 20));
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(30, 30));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 10));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 5));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(15, 15));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(20, 20));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(30, 30));
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(10, 10, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(20, 20, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(50, 20, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(30, 30, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 10, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 5, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(15, 15, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(20, 20, 0.1, 0.3));
+    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(30, 30, 0.1, 0.3));
     while(true) {
         auto initialRoom = roomProvider.RandomRoom(gen);
-        initialRoom->Generate(0.3, 0.4, gen);
+        initialRoom->Generate(gen);
         auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
         auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
         if (PlaceRoom(*initialRoom, 1, { randomx(gen), randomy(gen) }, Random::PickRandomRotation(gen))) {
@@ -92,7 +92,7 @@ void Dungeon::GenerateDungeon(std::mt19937 & gen) {
     int roomCounter = 1;
     for(int tryCounter = 0; roomCounter < 50 && tryCounter < 30000; tryCounter++) {
         auto otherRoom = roomProvider.RandomRoom(gen);
-        otherRoom->Generate(0.1, 0.3, gen);
+        otherRoom->Generate(gen);
         bool success = false;
         const auto door = Random::PickRandomElement(doors, gen);
         /*for(const auto & door : doors)*/ {

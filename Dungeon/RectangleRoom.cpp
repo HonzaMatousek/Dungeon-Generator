@@ -1,6 +1,6 @@
 #include "RectangleRoom.h"
 
-void RectangleRoom::Generate(double minRoomRatio, double maxRoomRatio, std::mt19937 & gen) {
+void RectangleRoom::Generate(std::mt19937 & gen) {
     bool success = false;
     while(!success) {
         Reset();

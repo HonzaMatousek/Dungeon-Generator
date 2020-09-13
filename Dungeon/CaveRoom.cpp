@@ -1,6 +1,6 @@
 #include "CaveRoom.h"
 
-void CaveRoom::Generate(double minRoomRatio, double maxRoomRatio, std::mt19937 & gen) {
+void CaveRoom::Generate(std::mt19937 & gen) {
     bool success = false;
     doors.clear();
     while(!success) {

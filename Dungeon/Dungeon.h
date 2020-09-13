@@ -13,6 +13,8 @@ class Dungeon {
 protected:
     int width;
     int height;
+    double minRoomRatio;
+    double maxRoomRatio;
     std::vector<std::vector<Tile>> tiles;
     std::vector<TileCoord> doors;
     void WalkTiles(const std::function<void(const TileCoord &)> & function);
@@ -22,7 +24,7 @@ protected:
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function);
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) const;
 public:
-    Dungeon(int width, int height);
+    Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio);
     void GenerateDungeon(std::mt19937 & gen);
     void Print() const;
 
