@@ -5,6 +5,6 @@ void FurnitureProvider::RegisterFurnitureStyle(std::unique_ptr<FurnitureStyle> &
     furnitureStyles.emplace_back(std::move(furnitureStyle));
 }
 
-std::unique_ptr<FurnitureStyle> FurnitureProvider::RandomFurnitureStyle(std::mt19937 &gen) {
+std::unique_ptr<FurnitureStyle> FurnitureProvider::RandomFurnitureStyle(std::mt19937 &gen) const {
     return Random::PickRandomElement(furnitureStyles, gen)->Clone();
 }

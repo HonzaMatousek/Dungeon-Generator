@@ -9,6 +9,6 @@ void RoomProvider::RegisterRoom(std::unique_ptr<Room> &&room) {
     rooms.emplace_back(std::move(room));
 }
 
-std::unique_ptr<Room> RoomProvider::RandomRoom(std::mt19937 &gen) {
+std::unique_ptr<Room> RoomProvider::RandomRoom(std::mt19937 &gen) const {
     return Random::PickRandomElement(rooms, gen)->Clone();
 }

@@ -6,6 +6,7 @@
 #include "Tile.h"
 #include "../Util/Constants.h"
 #include "../Util/TileCoord.h"
+#include "../Settings/GeneratorPreset.h"
 
 class Room;
 
@@ -25,7 +26,7 @@ protected:
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) const;
 public:
     Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio);
-    void GenerateDungeon(std::mt19937 & gen);
+    void GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen);
     void Print() const;
 
     int CountNeighbors8(const TileCoord & tileCoord, TileType type, bool CountEdge = false) const;

@@ -62,7 +62,7 @@ void Dungeon::Print() const {
     }
 }
 
-void Dungeon::GenerateDungeon(std::mt19937 & gen) {
+void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen) {
     BlobRoom mask(width, height, 0.6, 0.7);
     mask.Generate(gen);
     WalkTiles([&](const TileCoord & tileCoord) {
@@ -70,18 +70,8 @@ void Dungeon::GenerateDungeon(std::mt19937 & gen) {
             //at(tileCoord).type = TileType::MASK;
         }
     });
-    RoomProvider roomProvider;
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(10, 10, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(20, 20, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(50, 20, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<CaveRoom>(30, 30, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 10, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(10, 5, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(15, 15, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(20, 20, 0.1, 0.3));
-    roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(30, 30, 0.1, 0.3));
     while(true) {
-        auto initialRoom = roomProvider.RandomRoom(gen);
+        auto initialRoom = generatorPreset.RandomRoom(gen);
         initialRoom->Generate(gen);
         auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
         auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
@@ -91,7 +81,7 @@ void Dungeon::GenerateDungeon(std::mt19937 & gen) {
     }
     int roomCounter = 1;
     for(int tryCounter = 0; roomCounter < 50 && tryCounter < 30000; tryCounter++) {
-        auto otherRoom = roomProvider.RandomRoom(gen);
+        auto otherRoom = generatorPreset.RandomRoom(gen);
         otherRoom->Generate(gen);
         bool success = false;
         const auto door = Random::PickRandomElement(doors, gen);
@@ -131,14 +121,8 @@ void Dungeon::GenerateDungeon(std::mt19937 & gen) {
             at(tileCoord).type = TileType::WALL;
         }
     });
-    FurnitureProvider furnitureProvider;
-    furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>());
-    furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());
-    furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
-    furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
-    furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>());
     for(int i = 0; i < roomCounter; i++) {
-        std::unique_ptr<FurnitureStyle> furnitureStyle = furnitureProvider.RandomFurnitureStyle(gen);
+        std::unique_ptr<FurnitureStyle> furnitureStyle = generatorPreset.RandomFurnitureStyle(gen);
         furnitureStyle->FurnitureRoom(*this, i, gen);
     }
 }
