@@ -30,9 +30,11 @@ public:
     int CountNeighbors8OfSameRoom(const TileCoord & tileCoord, TileType type, int roomNumber, bool CountEdge = false) const;
     int CountNeighbors8OfOtherRoom(const TileCoord & tileCoord, TileType type, int roomNumber, bool CountEdge = false) const;
     int CountNeighbors4(const TileCoord & tileCoord, TileType type, bool CountEdge = false) const;
+    uint8_t MakeNeighborsBitMask(const TileCoord & tileCoord, TileType type, bool CountEdge = false) const;
     TileCoord FindTile(int roomNumber, TileType type) const;
     TileCoord FindRandomTile(int roomNumber, TileType type, std::mt19937 & gen) const;
     TileCoord FindRandomTileNearEdge(int roomNumber, TileType type, std::mt19937 & gen) const;
+    TileCoord FindRandomTileDisconnectible(int roomNumber, TileType type, std::mt19937 & gen) const;
     size_t CountRoomTiles(int roomNumber, TileType type) const;
     int RoomFlood4(int roomNumber, TileType type, const TileCoord & tileCoord);
     void Reset();

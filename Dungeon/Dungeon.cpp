@@ -11,6 +11,7 @@
 #include "../Furniture/FurnitureProvider.h"
 #include "../Furniture/EmptyFurniture.h"
 #include "../Furniture/ChestFurniture.h"
+#include "../Furniture/MazeFurniture.h"
 #include <random>
 #include <memory>
 #include <set>
@@ -135,6 +136,7 @@ void Dungeon::GenerateDungeon(std::mt19937 & gen) {
     furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());
     furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
     furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
+    furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>());
     for(int i = 0; i < roomCounter; i++) {
         std::unique_ptr<FurnitureStyle> furnitureStyle = furnitureProvider.RandomFurnitureStyle(gen);
         furnitureStyle->FurnitureRoom(*this, i, gen);
@@ -210,6 +212,21 @@ int Dungeon::CountNeighbors4(const TileCoord & tileCoord, TileType type, bool Co
     return result;
 }
 
+uint8_t Dungeon::MakeNeighborsBitMask(const TileCoord &tileCoord, TileType type, bool CountEdge) const {
+    uint8_t result = 0;
+    int x = tileCoord.x;
+    int y = tileCoord.y;
+    if(y > 0          && x > 0)         result |= (tiles[y-1][x-1].type == type) << 0u; else result |= CountEdge << 0u;
+    if(y > 0)                           result |= (tiles[y-1][x  ].type == type) << 1u; else result |= CountEdge << 1u;
+    if(y > 0          && x < width - 1) result |= (tiles[y-1][x+1].type == type) << 2u; else result |= CountEdge << 2u;
+    if(                  x < width - 1) result |= (tiles[y  ][x+1].type == type) << 3u; else result |= CountEdge << 3u;
+    if(y < height - 1 && x < width - 1) result |= (tiles[y+1][x+1].type == type) << 4u; else result |= CountEdge << 4u;
+    if(y < height - 1)                  result |= (tiles[y+1][x  ].type == type) << 5u; else result |= CountEdge << 5u;
+    if(y < height - 1 && x > 0)         result |= (tiles[y+1][x-1].type == type) << 6u; else result |= CountEdge << 6u;
+    if(                  x > 0)         result |= (tiles[y  ][x-1].type == type) << 7u; else result |= CountEdge << 7u;
+    return result;
+}
+
 TileCoord Dungeon::FindTile(int roomNumber, TileType type) const {
     return WalkTilesUntilValid([&](const TileCoord & tileCoord) {
         if(at(tileCoord).roomNumber == roomNumber && at(tileCoord).type == type) {
@@ -238,6 +255,30 @@ TileCoord Dungeon::FindRandomTileNearEdge(int roomNumber, TileType type, std::mt
     std::vector<TileCoord> roomTiles;
     WalkTiles([&](const TileCoord & tileCoord) {
         if(at(tileCoord).roomNumber == roomNumber && at(tileCoord).type == type && CountNeighbors4(tileCoord, type, true) < 4) {
+            roomTiles.push_back(tileCoord);
+        }
+    });
+    if(roomTiles.empty()) {
+        return TileCoord::Invalid();
+    }
+    return Random::PickRandomElement(roomTiles, gen);
+}
+
+TileCoord Dungeon::FindRandomTileDisconnectible(int roomNumber, TileType type, std::mt19937 & gen) const {
+    static std::set<uint8_t> validNeighborMasks{
+        0b00000000,
+        0b00000001, 0b00000010, 0b00000100, 0b00001000, 0b00010000, 0b00100000, 0b01000000, 0b10000000,
+        0b00000011, 0b00000110, 0b00001100, 0b00011000, 0b00110000, 0b01100000, 0b11000000, 0b10000001,
+        0b00000111, 0b00001110, 0b00011100, 0b00111000, 0b01110000, 0b11100000, 0b11000001, 0b10000011,
+        0b00001111, 0b00011110, 0b00111100, 0b01111000, 0b11110000, 0b11100001, 0b11000011, 0b10000111,
+        0b00011111, 0b00111110, 0b01111100, 0b11111000, 0b11110001, 0b11100011, 0b11000111, 0b10001111,
+        0b00111111, 0b01111110, 0b11111100, 0b11111001, 0b11110011, 0b11100111, 0b11001111, 0b10011111,
+        0b01111111, 0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111,
+        0b11111111
+    };
+    std::vector<TileCoord> roomTiles;
+    WalkTiles([&](const TileCoord & tileCoord) {
+        if(at(tileCoord).roomNumber == roomNumber && at(tileCoord).type == type && validNeighborMasks.find(MakeNeighborsBitMask(tileCoord, type, true) | MakeNeighborsBitMask(tileCoord, TileType::DOOR, true)) != validNeighborMasks.end()) {
             roomTiles.push_back(tileCoord);
         }
     });
