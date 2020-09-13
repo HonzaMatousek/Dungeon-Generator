@@ -31,7 +31,10 @@ void Dungeon::Print() const {
         for (int col = 0; col < width; col++) {
             switch(tiles[row][col].type) {
                 case TileType::WALL:
-                    if(CountNeighbors8({ col, row }, TileType::WALL, true) > 7) {
+                    if(tiles[row][col].roomNumber == -1) {
+                        std::cout << '@';
+                    }
+                    else if(CountNeighbors8({ col, row }, TileType::WALL, true) > 7) {
                         std::cout << ' ';
                     }
                     else {
@@ -120,6 +123,7 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
     WalkTiles([&](const TileCoord & tileCoord) {
         if(at(tileCoord).type == TileType::MASK) {
             at(tileCoord).type = TileType::WALL;
+            at(tileCoord).roomNumber = -1;
         }
     });
     for(int i = 0; i < roomCounter; i++) {

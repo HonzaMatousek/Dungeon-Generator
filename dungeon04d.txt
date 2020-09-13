@@ -1,0 +1,8 @@
+# comments
+
+room blob 50 50 0.0 1.0
+
+furniture empty
+
+rooms 1
+dungeon 300 200

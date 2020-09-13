@@ -1,13 +1,26 @@
+#include <map>
 #include "BlobRoom.h"
 
 void BlobRoom::Generate(std::mt19937 & gen) {
     bool success = false;
     doors.clear();
     while(!success) {
-        Noise(gen);
-        for (int i = 0; i < 10; i++) {
-            Blur(4, 5);
+        Reset();
+        std::map<TileCoord, int> numbers;
+        std::uniform_int_distribution<int> distX(0,width - 1);
+        std::uniform_int_distribution<int> distY(0, height - 1);
+        std::uniform_int_distribution<int> distZ(0, width + height);
+        for(int i = 0; i < 50; i++) {
+            TileCoord tileCoord{ distX(gen), distY(gen) };
+            numbers[tileCoord] = distZ(gen);
         }
+        WalkTiles([&](const TileCoord & tileCoord) {
+            for(auto & [ mountainCoord, mountainHeight ] : numbers) {
+                if(mountainHeight - std::sqrt(std::pow(tileCoord.x - mountainCoord.x, 2) + std::pow(tileCoord.y - mountainCoord.y, 2)) > (width + height) / 1.25) {
+                    at(tileCoord).type = TileType::FLOOR;
+                }
+            }
+        });
         {
             int roomCounter = 0;
             int bestRoomSize = (width - 2) * (height - 2) * minRoomRatio;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <limits>
+#include <tuple>
 #include "Constants.h"
 
 class Dungeon;
@@ -28,5 +29,9 @@ struct TileCoord {
     [[ nodiscard ]]
     TileCoord operator - (const TileCoord & rhs) const {
         return { x - rhs.x, y - rhs.y };
+    }
+
+    bool operator < (const TileCoord & rhs) const {
+        return std::tie(x, y) < std::tie(rhs.x, rhs.y);
     }
 };
