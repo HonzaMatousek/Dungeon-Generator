@@ -12,3 +12,6 @@ mask blob 300 200 0 2
 
 rooms 20
 dungeon 300 200
+
+render
+render dungeon04c.tga

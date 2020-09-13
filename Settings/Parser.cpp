@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include "Parser.h"
 #include "../Dungeon/RoomProvider.h"
 #include "../Furniture/FurnitureProvider.h"
@@ -10,6 +11,8 @@
 #include "../Furniture/MazeFurniture.h"
 #include "../Furniture/ChestFurniture.h"
 #include "../Furniture/EmptyFurniture.h"
+#include "../Output/OstreamRenderer.h"
+#include "../Output/ImageRenderer.h"
 
 void Parser::Run(const std::string &fileName) {
     std::ifstream inFile(fileName);
@@ -21,6 +24,7 @@ void Parser::Run(const std::string &fileName) {
     RoomProvider roomProvider;
     FurnitureProvider furnitureProvider;
     std::unique_ptr<Room> mask;
+    std::unique_ptr<Dungeon> dungeon;
     while(std::getline(inFile, line)) {
         std::string command;
         std::istringstream lineStream(line);
@@ -95,11 +99,22 @@ void Parser::Run(const std::string &fileName) {
             if(!lineStream) {
                 throw std::runtime_error("Dungeon command failed");
             }
-            Dungeon dungeon(dungeonWidth, dungeonHeight, 0, 0);
+            dungeon = std::make_unique<Dungeon>(dungeonWidth, dungeonHeight, 0, 0);
             std::random_device rd;
             std::mt19937 gen(rd());
-            dungeon.GenerateDungeon(GeneratorPreset(roomProvider, furnitureProvider, maxRooms, mask), gen);
-            dungeon.Print();
+            dungeon->GenerateDungeon(GeneratorPreset(roomProvider, furnitureProvider, maxRooms, mask), gen);
+        }
+        else if(command == "render") {
+            std::string renderType;
+            lineStream >> renderType;
+            std::unique_ptr<Renderer> renderer;
+            if(renderType == "") {
+                renderer = std::make_unique<OstreamRenderer>(std::cout);
+            }
+            else {
+                renderer = std::make_unique<ImageRenderer>(renderType);
+            }
+            renderer->Render(*dungeon);
         }
     }
 }

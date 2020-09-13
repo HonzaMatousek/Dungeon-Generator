@@ -19,15 +19,11 @@ protected:
     std::vector<std::vector<Tile>> tiles;
     std::vector<TileCoord> doors;
     void WalkTiles(const std::function<void(const TileCoord &)> & function);
-    void WalkTiles(const std::function<void(const TileCoord &)> & function) const;
     bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function);
-    bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function) const;
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function);
-    TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) const;
 public:
     Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio);
     void GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen);
-    void Print() const;
 
     int CountNeighbors8(const TileCoord & tileCoord, TileType type, bool CountEdge = false) const;
     int CountNeighbors8OfSameRoom(const TileCoord & tileCoord, TileType type, int roomNumber, bool CountEdge = false) const;
@@ -62,4 +58,8 @@ public:
 
     [[ nodiscard ]]
     int getHeight() const;
+
+    void WalkTiles(const std::function<void(const TileCoord &)> & function) const;
+    bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function) const;
+    TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) const;
 };

@@ -26,45 +26,6 @@ Dungeon::Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio
     }
 }
 
-void Dungeon::Print() const {
-    for (int row = 0; row < height; row++) {
-        for (int col = 0; col < width; col++) {
-            switch(tiles[row][col].type) {
-                case TileType::WALL:
-                    if(tiles[row][col].roomNumber == -1) {
-                        std::cout << '@';
-                    }
-                    else if(CountNeighbors8({ col, row }, TileType::WALL, true) > 7) {
-                        std::cout << ' ';
-                    }
-                    else {
-                        std::cout << "█";
-                    }
-                    break;
-                case TileType::FLOOR:
-                    //std::cout << (char)('0' + tiles[row][col].roomNumber);
-                    if(tiles[row][col].roomNumber == 0) {
-                        std::cout << "\033[38;5;" << (30 + (tiles[row][col].roomNumber % 200)) << "m-\033[0m";
-                    }
-                    else {
-                        std::cout << "\033[38;5;" << (30 + (tiles[row][col].roomNumber % 200)) << "m.\033[0m";
-                    }
-                    break;
-                case TileType::DOOR:
-                    std::cout << '#';
-                    break;
-                case TileType::MONSTER:
-                    std::cout << "☻";
-                    break;
-                case TileType::CHEST:
-                    std::cout << "☐";
-                    break;
-            }
-        }
-        std::cout << std::endl;
-    }
-}
-
 void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen) {
     if(auto mask = generatorPreset.GetMask()) {
         mask->Generate(gen);
@@ -378,16 +339,16 @@ int Dungeon::getHeight() const {
 }
 
 void Dungeon::WalkTiles(const std::function<void(const TileCoord &)> & function) {
-    for (int col = 0; col < width; col++) {
-        for (int row = 0; row < height; row++) {
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
             function({ col, row });
         }
     }
 }
 
 void Dungeon::WalkTiles(const std::function<void(const TileCoord &)> & function) const {
-    for (int col = 0; col < width; col++) {
-        for (int row = 0; row < height; row++) {
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
             function({ col, row });
         }
     }
