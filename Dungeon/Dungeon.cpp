@@ -111,48 +111,6 @@ void Dungeon::GenerateDungeon(std::mt19937 & gen) {
             }
         }
     }
-    int corridorCounter = 0;
-    for(int tryCounter = 0; corridorCounter < 0 && tryCounter < 10000; tryCounter++) {
-        const auto & door = Random::PickRandomElement(doors, gen);
-        if(CountNeighbors4(door, TileType::FLOOR) > 1) continue;
-        int room1 = door.y < height - 1 ? tiles[door.y+1][door.x].roomNumber : 0;
-        int room2 = door.y > 0 ? tiles[door.y-1][door.x].roomNumber : 0;
-        int room3 = door.x < width - 1 ? tiles[door.y][door.x+1].roomNumber : 0;
-        int room4 = door.x > 0 ? tiles[door.y][door.x-1].roomNumber : 0;
-        int roomNumber = (room1 > 0) ? room1 : (room2 > 0) ? room2 : (room3 > 0) ? room3 : room4;
-        auto randomDirection = std::uniform_int_distribution(0,1);
-        int diffX = randomDirection(gen) ? 1 : -1;
-        int diffY = 0;
-        if(randomDirection(gen)) {
-            std::swap(diffX, diffY);
-        }
-        bool success = false;
-        for(int x = door.x, y = door.y; x > 0 && y > 0 && x < width - 1 && y < height - 1; x += diffX, y += diffY) {
-            if(CountNeighbors8OfSameRoom({ x, y }, TileType::FLOOR, 0) > 3) {
-                break;
-            }
-            if(CountNeighbors8({ x, y }, TileType::FLOOR) > 4) {
-                break;
-            }
-            if(tiles[y][x].type == TileType::FLOOR && tiles[y][x].roomNumber != roomNumber) {
-                success = true;
-                break;
-            }
-            if(tiles[y][x].type == TileType::WALL) {
-                tiles[y][x].type = TileType::FLOOR;
-            }
-        }
-        if(!success) {
-            for(int x = door.x, y = door.y; x > 0 && y > 0 && x < width - 1 && y < height - 1; x += diffX, y += diffY) {
-                if(tiles[y][x].type == TileType::WALL) {
-                    break;
-                }
-                if(tiles[y][x].type == TileType::FLOOR && tiles[y][x].roomNumber == 0) {
-                    tiles[y][x].type = TileType::WALL;
-                }
-            }
-        }
-    }
     for(auto const & door : doors) {
         std::set<int> neighbors;
         if(door.y < height - 1 && tiles[door.y+1][door.x].roomNumber > 0) { neighbors.insert(tiles[door.y+1][door.x].roomNumber); }
@@ -346,11 +304,6 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, TileCoord position, Ro
                 at(tileCoord).roomNumber = 0;
             }
         });
-        for (int col = 0; col < width; col++) {
-            for (int row = 0; row < height; row++) {
-
-            }
-        }
     }
     else {
         for(auto const & door : room.doors) {
