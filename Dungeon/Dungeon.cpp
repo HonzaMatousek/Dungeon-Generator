@@ -63,13 +63,14 @@ void Dungeon::Print() const {
 }
 
 void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen) {
-    BlobRoom mask(width, height, 0.6, 0.7);
-    mask.Generate(gen);
-    WalkTiles([&](const TileCoord & tileCoord) {
-        if(mask.at(tileCoord).type == TileType::WALL) {
-            //at(tileCoord).type = TileType::MASK;
-        }
-    });
+    if(auto mask = generatorPreset.GetMask()) {
+        mask->Generate(gen);
+        WalkTiles([&](const TileCoord & tileCoord) {
+            if(mask->at(tileCoord).type == TileType::WALL) {
+                at(tileCoord).type = TileType::MASK;
+            }
+        });
+    }
     while(true) {
         auto initialRoom = generatorPreset.RandomRoom(gen);
         initialRoom->Generate(gen);
