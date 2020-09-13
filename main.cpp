@@ -35,7 +35,7 @@ int main() {
 
     Dungeon dungeon(220, 45, 0.5, 0.8);
     //Dungeon dungeon(350, 100);
-    dungeon.GenerateDungeon(GeneratorPreset(roomProvider, furnitureProvider), g);
+    dungeon.GenerateDungeon(GeneratorPreset(roomProvider, furnitureProvider, 50), g);
     dungeon.Print();
     //Room room(30, 30);
     //room.Generate(0.0,0.1);

@@ -12,4 +12,8 @@ std::unique_ptr<FurnitureStyle> GeneratorPreset::RandomFurnitureStyle(std::mt199
     return furnitureProvider.RandomFurnitureStyle(gen);
 }
 
-GeneratorPreset::GeneratorPreset(const RoomProvider &roomProvider, const FurnitureProvider &furnitureProvider) : roomProvider(roomProvider), furnitureProvider(furnitureProvider) {}
+GeneratorPreset::GeneratorPreset(const RoomProvider &roomProvider, const FurnitureProvider &furnitureProvider, int maxRoomCount) : roomProvider(roomProvider), furnitureProvider(furnitureProvider), maxRoomCount(maxRoomCount) {}
+
+int GeneratorPreset::MaxRoomCount() const {
+    return maxRoomCount;
+}

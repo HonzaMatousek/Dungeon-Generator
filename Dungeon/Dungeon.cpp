@@ -80,7 +80,7 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
         }
     }
     int roomCounter = 1;
-    for(int tryCounter = 0; roomCounter < 50 && tryCounter < 30000; tryCounter++) {
+    for(int tryCounter = 0; roomCounter < generatorPreset.MaxRoomCount() && tryCounter < 50 * generatorPreset.MaxRoomCount(); tryCounter++) {
         auto otherRoom = generatorPreset.RandomRoom(gen);
         otherRoom->Generate(gen);
         bool success = false;
