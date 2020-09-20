@@ -10,14 +10,19 @@ room rectangle 15 15 0.1 0.3
 room rectangle 20 20 0.1 0.3
 room rectangle 30 30 0.1 0.3
 
+furniture maze
+furniture maze
+furniture maze
+furniture maze
+furniture maze
+furniture maze
+furniture maze
+furniture maze
+furniture monster
 furniture monster
 furniture chest
-furniture empty
-furniture empty
-furniture maze
 
-rooms 80
-# dungeon 120 67
+rooms 120
 dungeon 240 135
 
-render dungeon04e.tga
+render dungeon04f.tga
