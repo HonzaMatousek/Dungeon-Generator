@@ -64,7 +64,10 @@ void Parser::Run(const std::string &fileName) {
                 palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>());
             }
             else if(furnitureType == "maze") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(MAZE));
+            }
+            else if(furnitureType == "maze_direct") {
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(DIRECT));
             }
             else if(furnitureType == "chest") {
                 palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());
@@ -183,7 +186,10 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                 palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>());
             }
             else if(furnitureType == "maze") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(MAZE));
+            }
+            else if(furnitureType == "maze_direct") {
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(DIRECT));
             }
             else if(furnitureType == "chest") {
                 palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());

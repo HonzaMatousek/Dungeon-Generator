@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include <functional>
+#include <set>
 #include "Tile.h"
 #include "../Util/Constants.h"
 #include "../Util/TileCoord.h"
@@ -35,7 +36,7 @@ public:
     TileCoord FindTile(int roomNumber, TileType type) const;
     TileCoord FindRandomTile(int roomNumber, TileType type, std::mt19937 & gen) const;
     TileCoord FindRandomTileNearEdge(int roomNumber, TileType type, std::mt19937 & gen) const;
-    TileCoord FindRandomTileDisconnectible(int roomNumber, TileType type, std::mt19937 & gen) const;
+    TileCoord FindRandomTileDisconnectible(int roomNumber, TileType type, std::mt19937 & gen, const std::set<uint8_t> & validNeighborMasks) const;
     size_t CountRoomTiles(int roomNumber, TileType type) const;
     int RoomFlood4(int roomNumber, TileType type, const TileCoord & tileCoord);
     void Reset();

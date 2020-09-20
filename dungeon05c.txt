@@ -32,7 +32,7 @@ end
 palette forest
     room cave 60 60 0.5 0.7
 
-    furniture maze
+    furniture maze_direct
 end
 
 rooms 1 forest
