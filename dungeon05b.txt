@@ -1,19 +1,19 @@
 palette palace
-    room rectangle 10 10 0.1 0.3
-    room rectangle 10 5 0.1 0.3
-    room rectangle 15 15 0.1 0.3
+    room 1 rectangle 10 10 0.1 0.3
+    room 1 rectangle 10 5 0.1 0.3
+    room 1 rectangle 15 15 0.1 0.3
 
-    furniture chest
-    furniture empty
-    furniture empty
+    furniture 1 chest
+    furniture 1 empty
+    furniture 1 empty
 end
 
 
 palette caves
-    room cave 50 20 0.3 0.4
-    room cave 30 30 0.3 0.4
+    room 1 cave 50 20 0.3 0.4
+    room 1 cave 30 30 0.3 0.4
 
-    furniture monster
+    furniture 1 monster
 end
 
 

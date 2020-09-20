@@ -5,10 +5,11 @@
 #include "RoomProvider.h"
 #include "../Util/Random.h"
 
-void RoomProvider::RegisterRoom(std::unique_ptr<Room> &&room) {
+void RoomProvider::RegisterRoom(std::unique_ptr<Room> &&room, double weight) {
     rooms.emplace_back(std::move(room));
+    weights.emplace_back(weight);
 }
 
 std::unique_ptr<Room> RoomProvider::RandomRoom(std::mt19937 &gen) const {
-    return Random::PickRandomElement(rooms, gen)->Clone();
+    return Random::PickRandomElementWeighted(rooms, weights, gen)->Clone();
 }

@@ -43,47 +43,48 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
         else if(command == "room") {
             std::string roomType;
             int roomWidth, roomHeight;
-            double roomMinDensity, roomMaxDensity;
-            lineStream >> roomType >> roomWidth >> roomHeight >> roomMinDensity >> roomMaxDensity;
+            double weight, roomMinDensity, roomMaxDensity;
+            lineStream >> weight >> roomType >> roomWidth >> roomHeight >> roomMinDensity >> roomMaxDensity;
             if(!lineStream) {
                 throw std::runtime_error("Room command failed");
             }
             if(roomType == "cave") {
-                palette.roomProvider.RegisterRoom(std::make_unique<CaveRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
+                palette.roomProvider.RegisterRoom(std::make_unique<CaveRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
             }
             else if(roomType == "blob") {
-                palette.roomProvider.RegisterRoom(std::make_unique<BlobRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
+                palette.roomProvider.RegisterRoom(std::make_unique<BlobRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
             }
             else if(roomType == "rectangle") {
-                palette.roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
+                palette.roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
             }
         }
         else if(command == "furniture") {
             std::string furnitureType;
-            lineStream >> furnitureType;
+            double weight;
+            lineStream >> weight >> furnitureType;
             if(!lineStream) {
                 throw std::runtime_error("Furniture command failed");
             }
             if(furnitureType == "monster") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>(), weight);
             }
             else if(furnitureType == "maze") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(MAZE));
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(MAZE), weight);
             }
             else if(furnitureType == "maze_direct") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(DIRECT));
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>(DIRECT), weight);
             }
             else if(furnitureType == "chest") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>(), weight);
             }
             else if(furnitureType == "empty") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>(), weight);
             }
             else if(furnitureType == "start") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::START));
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::START), weight);
             }
             else if(furnitureType == "finish") {
-                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::FINISH));
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::FINISH), weight);
             }
         }
         else if(!paletteName.empty() && command == "end") {

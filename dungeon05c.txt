@@ -1,38 +1,38 @@
 palette start
-    room cave 10 10 0.3 0.4
+    room 1 cave 10 10 0.3 0.4
 
-    furniture start
+    furniture 1 start
 end
 
 palette finish
-    room rectangle 8 8 0.3 0.4
+    room 1 rectangle 8 8 0.3 0.4
 
-    furniture finish
+    furniture 1 finish
 end
 
 palette palace
-    room rectangle 10 10 0.1 0.3
-    room rectangle 10 5 0.1 0.3
-    room rectangle 15 15 0.1 0.3
+    room 1 rectangle 10 10 0.1 0.3
+    room 1 rectangle 10 5 0.1 0.3
+    room 1 rectangle 15 15 0.1 0.3
 
-    furniture chest
-    furniture empty
-    furniture empty
+    furniture 1 chest
+    furniture 2 empty
 end
 
 
 palette caves
-    room cave 50 20 0.3 0.4
-    room cave 30 30 0.3 0.4
+    room 1 cave 50 20 0.3 0.4
+    room 1 cave 30 30 0.3 0.4
 
-    furniture monster
+    furniture 1 monster
+    furniture 10 empty
 end
 
 
 palette forest
-    room cave 60 60 0.5 0.7
+    room 1 cave 60 60 0.5 0.7
 
-    furniture maze_direct
+    furniture 1 maze_direct
 end
 
 rooms 1 forest

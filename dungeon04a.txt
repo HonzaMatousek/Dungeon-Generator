@@ -1,11 +1,11 @@
 # comments
 
-room cave 20 20 0.3 0.5
-room cave 10 20 0.3 0.5
-room cave 50 50 0.3 0.5
+room 1 cave 20 20 0.3 0.5
+room 1 cave 10 20 0.3 0.5
+room 1 cave 50 50 0.3 0.5
 
-furniture monster
-furniture maze
+furniture 1 monster
+furniture 1 maze
 
 rooms 20
 dungeon 300 200
