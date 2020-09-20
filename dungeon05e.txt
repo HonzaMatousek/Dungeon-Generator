@@ -42,8 +42,6 @@ end
 
 palette circle
     room 1 circle 100 100 0.5 0.6
-
-    furniture 1 empty
 end
 
 rooms 1 circle

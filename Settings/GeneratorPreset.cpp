@@ -2,6 +2,7 @@
 
 #include "../Dungeon/RoomProvider.h"
 #include "../Furniture/FurnitureProvider.h"
+#include "../Furniture/EmptyFurniture.h"
 
 std::unique_ptr<Room> GeneratorPreset::RandomRoom(std::mt19937 &gen) const {
     return roomProvider.RandomRoom(gen);
@@ -9,6 +10,9 @@ std::unique_ptr<Room> GeneratorPreset::RandomRoom(std::mt19937 &gen) const {
 }
 
 std::unique_ptr<FurnitureStyle> GeneratorPreset::RandomFurnitureStyle(std::mt19937 &gen) const {
+    if(furnitureProvider.Empty()) {
+        return std::make_unique<EmptyFurniture>();
+    }
     return furnitureProvider.RandomFurnitureStyle(gen);
 }
 
