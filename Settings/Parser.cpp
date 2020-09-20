@@ -22,13 +22,10 @@ void Parser::Run(const std::string &fileName) {
         throw std::runtime_error("File not found");
     }
     std::string line;
-    int maxRooms = 10;
-    RoomProvider roomProvider;
-    FurnitureProvider furnitureProvider;
     std::unique_ptr<Room> mask;
     std::unique_ptr<Dungeon> dungeon;
     std::map<std::string, Palette> palettes;
-    std::string currentPaletteName;
+    std::vector<std::pair<int, std::string>> roomsToGenerate;
     while(std::getline(inFile, line)) {
         std::string command;
         std::istringstream lineStream(line);
@@ -44,14 +41,15 @@ void Parser::Run(const std::string &fileName) {
             if(!lineStream) {
                 throw std::runtime_error("Room command failed");
             }
+            Palette & palette = palettes[""];
             if(roomType == "cave") {
-                roomProvider.RegisterRoom(std::make_unique<CaveRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
+                palette.roomProvider.RegisterRoom(std::make_unique<CaveRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
             }
             else if(roomType == "blob") {
-                roomProvider.RegisterRoom(std::make_unique<BlobRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
+                palette.roomProvider.RegisterRoom(std::make_unique<BlobRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
             }
             else if(roomType == "rectangle") {
-                roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
+                palette.roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity));
             }
         }
         else if(command == "furniture") {
@@ -60,17 +58,18 @@ void Parser::Run(const std::string &fileName) {
             if(!lineStream) {
                 throw std::runtime_error("Furniture command failed");
             }
+            Palette & palette = palettes[""];
             if(furnitureType == "monster") {
-                furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MonsterFurniture>());
             }
             else if(furnitureType == "maze") {
-                furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<MazeFurniture>());
             }
             else if(furnitureType == "chest") {
-                furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<ChestFurniture>());
             }
             else if(furnitureType == "empty") {
-                furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
             }
         }
         else if(command == "mask") {
@@ -92,11 +91,14 @@ void Parser::Run(const std::string &fileName) {
             }
         }
         else if(command == "rooms") {
-            lineStream >> maxRooms;
+            int roomCount;
+            std::string roomPalette;
+            lineStream >> roomCount;
             if(!lineStream) {
                 throw std::runtime_error("Rooms command failed");
             }
-            lineStream >> currentPaletteName;
+            lineStream >> roomPalette;
+            roomsToGenerate.emplace_back(roomCount, roomPalette);
         }
         else if(command == "palette") {
             std::string paletteName;
@@ -115,13 +117,11 @@ void Parser::Run(const std::string &fileName) {
             dungeon = std::make_unique<Dungeon>(dungeonWidth, dungeonHeight, 0, 0);
             std::random_device rd;
             std::mt19937 gen(rd());
-            if(currentPaletteName.empty()) {
-                dungeon->GenerateDungeon(GeneratorPreset(roomProvider, furnitureProvider, maxRooms, mask), gen);
+            for(auto const & [ roomCount, paletteName ] : roomsToGenerate) {
+                Palette & palette = palettes[paletteName];
+                dungeon->GenerateDungeon(GeneratorPreset(palette.roomProvider, palette.furnitureProvider, roomCount, mask), gen);
             }
-            else {
-                Palette & palette = palettes[currentPaletteName];
-                dungeon->GenerateDungeon(GeneratorPreset(palette.roomProvider, palette.furnitureProvider, maxRooms, mask), gen);
-            }
+            dungeon->FinishDungeon();
         }
         else if(command == "render") {
             std::string renderType;

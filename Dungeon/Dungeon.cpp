@@ -27,25 +27,31 @@ Dungeon::Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio
 }
 
 void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen) {
-    if(auto mask = generatorPreset.GetMask()) {
-        mask->Generate(gen);
-        WalkTiles([&](const TileCoord & tileCoord) {
-            if(mask->at(tileCoord).type == TileType::WALL) {
-                at(tileCoord).type = TileType::MASK;
+    int generatedRoomCounter = 0;
+    if(doors.empty()) {
+        // dungeon is empty
+        // first call
+        if(auto mask = generatorPreset.GetMask()) {
+            mask->Generate(gen);
+            WalkTiles([&](const TileCoord & tileCoord) {
+                if(mask->at(tileCoord).type == TileType::WALL) {
+                    at(tileCoord).type = TileType::MASK;
+                }
+            });
+        }
+        while (true) {
+            auto initialRoom = generatorPreset.RandomRoom(gen);
+            initialRoom->Generate(gen);
+            auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
+            auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
+            if (PlaceRoom(*initialRoom, 1, {randomx(gen), randomy(gen)}, Random::PickRandomRotation(gen))) {
+                roomCounter++;
+                generatedRoomCounter++;
+                break;
             }
-        });
-    }
-    while(true) {
-        auto initialRoom = generatorPreset.RandomRoom(gen);
-        initialRoom->Generate(gen);
-        auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
-        auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
-        if (PlaceRoom(*initialRoom, 1, { randomx(gen), randomy(gen) }, Random::PickRandomRotation(gen))) {
-            break;
         }
     }
-    int roomCounter = 1;
-    for(int tryCounter = 0; roomCounter < generatorPreset.MaxRoomCount() && tryCounter < 50 * generatorPreset.MaxRoomCount(); tryCounter++) {
+    for(int tryCounter = 0; generatedRoomCounter < generatorPreset.MaxRoomCount() && tryCounter < 50 * generatorPreset.MaxRoomCount(); tryCounter++) {
         auto otherRoom = generatorPreset.RandomRoom(gen);
         otherRoom->Generate(gen);
         bool success = false;
@@ -57,6 +63,7 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
                 TileCoord d = otherRoomDoor.Transform(*otherRoom, otherRotation);
                 if(PlaceRoom(*otherRoom, roomCounter + 1, door - d, otherRotation)) {
                     roomCounter++;
+                    generatedRoomCounter++;
                     success = true;
                     break;
                 }
@@ -67,27 +74,7 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
             }
         }
     }
-    for(auto const & door : doors) {
-        std::set<int> neighbors;
-        if(door.y < height - 1 && tiles[door.y+1][door.x].roomNumber > 0) { neighbors.insert(tiles[door.y+1][door.x].roomNumber); }
-        if(door.y > 0          && tiles[door.y-1][door.x].roomNumber > 0) { neighbors.insert(tiles[door.y-1][door.x].roomNumber); }
-        if(door.x < width - 1  && tiles[door.y][door.x+1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x+1].roomNumber); }
-        if(door.x > 0          && tiles[door.y][door.x-1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x-1].roomNumber); }
-        if(neighbors.size() <= 1) {
-            at(door).roomNumber = 0;
-        }
-        else {
-            at(door).type = TileType::DOOR;
-            at(door).roomNumber = 0;
-        }
-    }
-    WalkTiles([&](const TileCoord & tileCoord) {
-        if(at(tileCoord).type == TileType::MASK) {
-            at(tileCoord).type = TileType::WALL;
-            at(tileCoord).roomNumber = -1;
-        }
-    });
-    for(int i = 1; i <= roomCounter; i++) {
+    for(int i = roomCounter - generatedRoomCounter + 1; i <= roomCounter; i++) {
         std::unique_ptr<FurnitureStyle> furnitureStyle = generatorPreset.RandomFurnitureStyle(gen);
         furnitureStyle->FurnitureRoom(*this, i, gen);
     }
@@ -245,6 +232,8 @@ void Dungeon::Reset() {
         at(tileCoord).roomNumber = 0;
         at(tileCoord).type = TileType::WALL;
     });
+    roomCounter = 0;
+    doors.clear();
 }
 
 void Dungeon::Noise(std::mt19937 &gen) {
@@ -394,4 +383,29 @@ TileCoord Dungeon::WalkTilesUntilValid(const std::function<TileCoord(const TileC
         }
     }
     return TileCoord::Invalid();
+}
+
+void Dungeon::FinishDungeon() {
+    for(auto const & door : doors) {
+        std::set<int> neighbors;
+        if(door.y < height - 1 && tiles[door.y+1][door.x].roomNumber > 0) { neighbors.insert(tiles[door.y+1][door.x].roomNumber); }
+        if(door.y > 0          && tiles[door.y-1][door.x].roomNumber > 0) { neighbors.insert(tiles[door.y-1][door.x].roomNumber); }
+        if(door.x < width - 1  && tiles[door.y][door.x+1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x+1].roomNumber); }
+        if(door.x > 0          && tiles[door.y][door.x-1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x-1].roomNumber); }
+        if(neighbors.size() <= 1) {
+            // wall doors in
+            at(door).roomNumber = 0;
+        }
+        else {
+            // change wall to door
+            at(door).type = TileType::DOOR;
+            at(door).roomNumber = 0;
+        }
+    }
+    WalkTiles([&](const TileCoord & tileCoord) {
+        if(at(tileCoord).type == TileType::MASK) {
+            at(tileCoord).type = TileType::WALL;
+            at(tileCoord).roomNumber = -1;
+        }
+    });
 }

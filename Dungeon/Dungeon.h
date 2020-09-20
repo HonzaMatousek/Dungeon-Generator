@@ -21,9 +21,11 @@ protected:
     void WalkTiles(const std::function<void(const TileCoord &)> & function);
     bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function);
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function);
+    int roomCounter = 0;
 public:
     Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio);
     void GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen);
+    void FinishDungeon();
 
     int CountNeighbors8(const TileCoord & tileCoord, TileType type, bool CountEdge = false) const;
     int CountNeighbors8OfSameRoom(const TileCoord & tileCoord, TileType type, int roomNumber, bool CountEdge = false) const;
