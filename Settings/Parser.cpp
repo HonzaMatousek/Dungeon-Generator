@@ -15,6 +15,7 @@
 #include "../Output/OstreamRenderer.h"
 #include "../Output/ImageRenderer.h"
 #include "Palette.h"
+#include "../Furniture/SingleFurniture.h"
 
 void Parser::Run(const std::string &fileName) {
     std::ifstream inFile(fileName);
@@ -70,6 +71,12 @@ void Parser::Run(const std::string &fileName) {
             }
             else if(furnitureType == "empty") {
                 palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
+            }
+            else if(furnitureType == "start") {
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::START));
+            }
+            else if(furnitureType == "finish") {
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::FINISH));
             }
         }
         else if(command == "mask") {
@@ -183,6 +190,12 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             }
             else if(furnitureType == "empty") {
                 palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<EmptyFurniture>());
+            }
+            else if(furnitureType == "start") {
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::START));
+            }
+            else if(furnitureType == "finish") {
+                palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::FINISH));
             }
         }
         else if(command == "end") {

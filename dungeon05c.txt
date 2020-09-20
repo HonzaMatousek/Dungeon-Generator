@@ -1,3 +1,15 @@
+palette start
+    room cave 10 10 0.3 0.4
+
+    furniture start
+end
+
+palette finish
+    room rectangle 8 8 0.3 0.4
+
+    furniture finish
+end
+
 palette palace
     room rectangle 10 10 0.1 0.3
     room rectangle 10 5 0.1 0.3
@@ -24,8 +36,10 @@ palette forest
 end
 
 rooms 1 forest
+rooms 1 start
 rooms 15 caves
 rooms 20 palace
+rooms 1 finish
 
 dungeon 240 135
 

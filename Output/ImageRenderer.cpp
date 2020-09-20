@@ -45,6 +45,18 @@ void ImageRenderer::Render(const Dungeon &dungeon) {
                         spriteX = 16;
                         spriteY = 16;
                         break;
+                    case TileType::MASK:
+                        spriteX = 16;
+                        spriteY = 48;
+                        break;
+                    case TileType::START:
+                        spriteX = 32;
+                        spriteY = 0;
+                        break;
+                    case TileType::FINISH:
+                        spriteX = 48;
+                        spriteY = 0;
+                        break;
                 }
                 outputFile.write(tiles.data() + ((spriteY + line) * 64 + spriteX) * 3, 16 * 3);
             }

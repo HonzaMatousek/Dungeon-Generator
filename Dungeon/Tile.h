@@ -7,6 +7,8 @@ enum class TileType {
     MASK = 3,
     MONSTER = 4,
     CHEST = 5,
+    START = 6,
+    FINISH = 7,
 };
 
 class Tile {

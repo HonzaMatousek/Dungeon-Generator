@@ -39,6 +39,15 @@ void OstreamRenderer::Render(const Dungeon &dungeon) {
                 case TileType::CHEST:
                     ostream << "☐";
                     break;
+                case TileType::MASK:
+                    ostream << '@';
+                    break;
+                case TileType::START:
+                    ostream << '$';
+                    break;
+                case TileType::FINISH:
+                    ostream << '^';
+                    break;
             }
         }
         ostream << std::endl;
