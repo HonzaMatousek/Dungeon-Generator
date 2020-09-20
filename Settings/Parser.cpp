@@ -16,6 +16,7 @@
 #include "../Output/ImageRenderer.h"
 #include "Palette.h"
 #include "../Furniture/SingleFurniture.h"
+#include "../Dungeon/CircleRoom.h"
 
 void Parser::Run(const std::string &fileName) {
     std::ifstream inFile(fileName);
@@ -56,6 +57,9 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             }
             else if(roomType == "rectangle") {
                 palette.roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
+            }
+            else if(roomType == "circle") {
+                palette.roomProvider.RegisterRoom(std::make_unique<CircleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
             }
         }
         else if(command == "furniture") {

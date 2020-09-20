@@ -1,0 +1,57 @@
+palette start
+    room 1 cave 10 10 0.3 0.4
+
+    furniture 1 start
+end
+
+palette finish
+    room 1 rectangle 8 8 0.3 0.4
+
+    furniture 1 finish
+end
+
+palette palace
+    room 1 rectangle 10 10 0.1 0.3
+    room 1 rectangle 10 5 0.1 0.3
+    room 1 rectangle 15 15 0.1 0.3
+
+    furniture 1 chest then
+        furniture 1 empty
+        furniture 10 monster
+    end
+    furniture 2 empty
+end
+
+
+palette caves
+    room 1 cave 50 20 0.3 0.4
+    room 1 cave 30 30 0.3 0.4
+
+    furniture 1 monster
+    furniture 10 empty
+end
+
+
+palette forest
+    room 1 cave 60 60 0.5 0.7
+
+    furniture 1 maze_direct then
+        furniture 1 monster
+    end
+end
+
+palette circle
+    room 1 circle 100 100 0.5 0.6
+
+    furniture 1 empty
+end
+
+rooms 1 circle
+rooms 1 start
+rooms 15 caves
+rooms 20 palace
+rooms 1 finish
+
+dungeon 240 135
+
+render dungeon05e.tga

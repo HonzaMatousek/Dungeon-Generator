@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <tuple>
+#include <cmath>
 #include "Constants.h"
 
 class Dungeon;
@@ -33,5 +34,10 @@ struct TileCoord {
 
     bool operator < (const TileCoord & rhs) const {
         return std::tie(x, y) < std::tie(rhs.x, rhs.y);
+    }
+
+    [[ nodiscard ]]
+    double DistancePythagorean(const TileCoord & rhs) const {
+        return std::sqrt(std::pow(x - rhs.x, 2) + std::pow(y - rhs.y, 2));
     }
 };
