@@ -8,6 +8,7 @@ void MonsterFurniture::FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19
             dungeon.at(find).type = TileType::MONSTER;
         }
     }
+    FurnitureStyle::FurnitureRoom(dungeon, roomNumber, gen);
 }
 
 std::unique_ptr<FurnitureStyle> MonsterFurniture::Clone() const {

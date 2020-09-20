@@ -9,3 +9,11 @@ void FurnitureProvider::RegisterFurnitureStyle(std::unique_ptr<FurnitureStyle> &
 std::unique_ptr<FurnitureStyle> FurnitureProvider::RandomFurnitureStyle(std::mt19937 &gen) const {
     return Random::PickRandomElementWeighted(furnitureStyles, weights, gen)->Clone();
 }
+
+std::unique_ptr<FurnitureStyle> FurnitureProvider::LastFurnitureStyle() const {
+    return furnitureStyles.back()->Clone();
+}
+
+bool FurnitureProvider::Empty() const {
+    return furnitureStyles.empty();
+}

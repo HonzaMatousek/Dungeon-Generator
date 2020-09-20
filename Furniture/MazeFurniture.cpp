@@ -41,13 +41,14 @@ void MazeFurniture::FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19937
         dungeon.at(tileCoord).type = TileType::WALL;
         dungeon.at(tileCoord).roomNumber = 0;
     }
+    FurnitureStyle::FurnitureRoom(dungeon, roomNumber, gen);
 }
 
 std::unique_ptr<FurnitureStyle> MazeFurniture::Clone() const {
     return std::make_unique<MazeFurniture>(*this);
 }
 
-MazeFurniture::MazeFurniture(MazeType mazeType) : mazeType(mazeType) {}
+MazeFurniture::MazeFurniture(MazeType mazeType) : FurnitureStyle(), mazeType(mazeType) {}
 
 /*
  *

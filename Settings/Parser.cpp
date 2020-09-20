@@ -86,6 +86,11 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             else if(furnitureType == "finish") {
                 palette.furnitureProvider.RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::FINISH), weight);
             }
+            std::string then;
+            lineStream >> then;
+            if(then == "then") {
+                RunFurnitureThen(input, palette.furnitureProvider.LastFurnitureStyle()->getSubFurnitures());
+            }
         }
         else if(!paletteName.empty() && command == "end") {
             return;
@@ -152,6 +157,55 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                 renderer = std::make_unique<ImageRenderer>(renderType);
             }
             renderer->Render(*dungeon);
+        }
+    }
+}
+
+void Parser::RunFurnitureThen(std::istream &input, const std::shared_ptr<FurnitureProvider> &furnitureProvider) {
+    std::string line;
+    while(std::getline(input, line)) {
+        std::string command;
+        std::istringstream lineStream(line);
+        lineStream >> command;
+        if(command == "#") {
+            // do nothing
+        }
+        else if(command == "furniture") {
+            std::string furnitureType;
+            double weight;
+            lineStream >> weight >> furnitureType;
+            if(!lineStream) {
+                throw std::runtime_error("Furniture command failed");
+            }
+            if(furnitureType == "monster") {
+                furnitureProvider->RegisterFurnitureStyle(std::make_unique<MonsterFurniture>(), weight);
+            }
+            else if(furnitureType == "maze") {
+                furnitureProvider->RegisterFurnitureStyle(std::make_unique<MazeFurniture>(MAZE), weight);
+            }
+            else if(furnitureType == "maze_direct") {
+                furnitureProvider->RegisterFurnitureStyle(std::make_unique<MazeFurniture>(DIRECT), weight);
+            }
+            else if(furnitureType == "chest") {
+                furnitureProvider->RegisterFurnitureStyle(std::make_unique<ChestFurniture>(), weight);
+            }
+            else if(furnitureType == "empty") {
+                furnitureProvider->RegisterFurnitureStyle(std::make_unique<EmptyFurniture>(), weight);
+            }
+            else if(furnitureType == "start") {
+                furnitureProvider->RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::START), weight);
+            }
+            else if(furnitureType == "finish") {
+                furnitureProvider->RegisterFurnitureStyle(std::make_unique<SingleFurniture>(TileType::FINISH), weight);
+            }
+            std::string then;
+            lineStream >> then;
+            if(then == "then") {
+                RunFurnitureThen(input, furnitureProvider->LastFurnitureStyle()->getSubFurnitures());
+            }
+        }
+        else if(command == "end") {
+            return;
         }
     }
 }
