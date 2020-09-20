@@ -74,9 +74,17 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
             }
         }
     }
+    for(auto const & door : doors) {
+        // change wall to door
+        at(door).type = TileType::DOOR;
+    }
     for(int i = roomCounter - generatedRoomCounter + 1; i <= roomCounter; i++) {
         std::unique_ptr<FurnitureStyle> furnitureStyle = generatorPreset.RandomFurnitureStyle(gen);
         furnitureStyle->FurnitureRoom(*this, i, gen);
+    }
+    for(auto const & door : doors) {
+        // change door to wall
+        at(door).type = TileType::WALL;
     }
 }
 
