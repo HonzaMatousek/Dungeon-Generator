@@ -47,6 +47,8 @@ public:
     void Blur(int floorThreshold, int wallThreshold);
     bool PlaceRoom(const Room & room, int roomNumber, TileCoord position, Rotation rotation);
     bool TryPlaceRoomRandomly(const Room & otherRoom, std::mt19937 & gen);
+    TileCoord FindMinimumBB() const;
+    TileCoord FindMaximumBB() const;
 
     [[ nodiscard ]]
     Tile & at(int x, int y);

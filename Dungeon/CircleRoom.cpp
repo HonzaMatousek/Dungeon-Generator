@@ -10,6 +10,7 @@ void CircleRoom::Generate(std::mt19937 & gen) {
             at(tileCoord).roomNumber = 1;
         }
     });
+    roomCounter = 1;
     GenerateDoors((int)radius * 2, gen);
 }
 

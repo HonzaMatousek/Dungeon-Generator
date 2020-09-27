@@ -1,0 +1,30 @@
+palette caves
+    room 1 cave 50 20 0.3 0.4
+    room 1 cave 30 30 0.3 0.4
+
+    furniture 1 monster
+    furniture 10 empty
+end
+
+palette mines
+    room 10 cave 10 10 0.3 0.4
+    room 1 cave 20 20 0.3 0.4
+
+    furniture 10 monster
+    furniture 1 chest
+end
+
+group cave_system
+    rooms 5 caves
+end
+
+group mine_system
+    rooms 30 mines
+end
+
+rooms 1 cave_system
+rooms 1 mine_system
+
+dungeon 240 135
+
+render dungeon06b.tga

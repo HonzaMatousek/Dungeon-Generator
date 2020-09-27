@@ -18,6 +18,7 @@ void RectangleRoom::Generate(std::mt19937 & gen) {
                 tiles[row][col].roomNumber = 1;
             }
         }
+        roomCounter = 1;
         GenerateDoors(std::sqrt(roomW * roomH), gen);
     }
 }

@@ -18,7 +18,7 @@ namespace Random {
     }
 
     inline Rotation PickRandomRotation(std::mt19937 & gen) {
-        auto d = std::uniform_int_distribution<size_t>(0, 4);
+        auto d = std::uniform_int_distribution<size_t>(0, 3);
         return Rotation(d(gen));
     }
 };
