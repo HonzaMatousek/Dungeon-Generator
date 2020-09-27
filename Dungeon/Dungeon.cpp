@@ -27,10 +27,7 @@ Dungeon::Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio
 }
 
 void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen) {
-    int generatedRoomCounter = 0;
     if(doors.empty()) {
-        // dungeon is empty
-        // first call
         if(auto mask = generatorPreset.GetMask()) {
             mask->Generate(gen);
             WalkTiles([&](const TileCoord & tileCoord) {
@@ -39,39 +36,13 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
                 }
             });
         }
-        while (true) {
-            auto initialRoom = generatorPreset.RandomRoom(gen);
-            initialRoom->Generate(gen);
-            auto randomx = std::uniform_int_distribution(0, width - initialRoom->width);
-            auto randomy = std::uniform_int_distribution(0, height - initialRoom->height);
-            if (PlaceRoom(*initialRoom, 1, {randomx(gen), randomy(gen)}, Random::PickRandomRotation(gen))) {
-                roomCounter++;
-                generatedRoomCounter++;
-                break;
-            }
-        }
     }
+    int generatedRoomCounter = 0;
     for(int tryCounter = 0; generatedRoomCounter < generatorPreset.MaxRoomCount() && tryCounter < 50 * generatorPreset.MaxRoomCount(); tryCounter++) {
         auto otherRoom = generatorPreset.RandomRoom(gen);
         otherRoom->Generate(gen);
-        bool success = false;
-        const auto door = Random::PickRandomElement(doors, gen);
-        /*for(const auto & door : doors)*/ {
-            if(at(door).roomNumber == -1) continue;
-            for(const auto & otherRoomDoor : otherRoom->doors) {
-                Rotation otherRotation = Random::PickRandomRotation(gen);
-                TileCoord d = otherRoomDoor.Transform(*otherRoom, otherRotation);
-                if(PlaceRoom(*otherRoom, roomCounter + 1, door - d, otherRotation)) {
-                    roomCounter++;
-                    generatedRoomCounter++;
-                    success = true;
-                    break;
-                }
-            }
-            if(success) {
-                at(door).roomNumber = -1;
-                //break;
-            }
+        if(TryPlaceRoomRandomly(*otherRoom, gen)) {
+            generatedRoomCounter++;
         }
     }
     for(auto const & door : doors) {
@@ -265,18 +236,18 @@ void Dungeon::Blur(int floorThreshold, int wallThreshold) {
 bool Dungeon::PlaceRoom(const Room &room, int roomNumber, TileCoord position, Rotation rotation) {
     bool failed = !room.WalkTilesChecked([&](const TileCoord & tileCoord) {
         auto d = tileCoord.Transform(room, rotation) + position;
-        if(room.at(tileCoord).type == TileType::FLOOR) {
-            if(d.y > height - 2 || d.x > width - 2 || d.y < 1 || d.x < 1 || at(d).type == TileType::FLOOR || CountNeighbors8OfOtherRoom(d, TileType::FLOOR, roomNumber) || at(d).type == TileType::MASK) {
+        if(room.at(tileCoord).type != TileType::WALL && room.at(tileCoord).type != TileType::DOOR) {
+            if(d.y > height - 2 || d.x > width - 2 || d.y < 1 || d.x < 1 || at(d).type != TileType::WALL || CountNeighbors8OfOtherRoom(d, TileType::FLOOR, roomNumber) || at(d).type == TileType::MASK) {
                 return false;
             }
-            at(d).type = TileType::FLOOR;
+            at(d).type = room.at(tileCoord).type;
             at(d).roomNumber = roomNumber;
         }
         return true;
     });
     if(failed) {
         WalkTiles([&](const TileCoord & tileCoord) {
-            if(at(tileCoord).type == TileType::FLOOR && at(tileCoord).roomNumber == roomNumber) {
+            if(at(tileCoord).type != TileType::WALL && at(tileCoord).roomNumber == roomNumber) {
                 at(tileCoord).type = TileType::WALL;
                 at(tileCoord).roomNumber = 0;
             }
@@ -389,6 +360,7 @@ void Dungeon::FinishDungeon() {
         if(door.x > 0          && tiles[door.y][door.x-1].roomNumber > 0) { neighbors.insert(tiles[door.y][door.x-1].roomNumber); }
         if(neighbors.size() <= 1) {
             // wall doors in
+            at(door).type = TileType::DOOR; // debug
             at(door).roomNumber = 0;
         }
         else {
@@ -403,4 +375,32 @@ void Dungeon::FinishDungeon() {
             at(tileCoord).roomNumber = -1;
         }
     });
+}
+
+bool Dungeon::TryPlaceRoomRandomly(const Room &otherRoom, std::mt19937 & gen) {
+    if(doors.empty()) {
+        auto randomx = std::uniform_int_distribution(0, width - otherRoom.width);
+        auto randomy = std::uniform_int_distribution(0, height - otherRoom.height);
+        if (PlaceRoom(otherRoom, 1, {randomx(gen), randomy(gen)}, Random::PickRandomRotation(gen))) {
+            roomCounter++;
+            return true;
+        }
+        return false;
+    }
+    else {
+        const auto door = Random::PickRandomElement(doors, gen);
+        /*for(const auto & door : doors)*/ {
+            if (at(door).roomNumber == -1) return false;
+            for (const auto &otherRoomDoor : otherRoom.doors) {
+                Rotation otherRotation = Random::PickRandomRotation(gen);
+                TileCoord d = otherRoomDoor.Transform(otherRoom, otherRotation);
+                if (PlaceRoom(otherRoom, roomCounter + 1, door - d, otherRotation)) {
+                    at(door).roomNumber = -1;
+                    roomCounter++;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

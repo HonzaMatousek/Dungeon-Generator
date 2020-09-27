@@ -10,6 +10,7 @@
 #include "../Settings/GeneratorPreset.h"
 
 class Room;
+class DungeonRoom;
 
 class Dungeon {
 protected:
@@ -23,6 +24,8 @@ protected:
     bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function);
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function);
     int roomCounter = 0;
+
+    friend DungeonRoom;
 public:
     Dungeon(int width, int height, double minRoomRatio, double maxRoomRatio);
     void GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen);
@@ -43,6 +46,7 @@ public:
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
     bool PlaceRoom(const Room & room, int roomNumber, TileCoord position, Rotation rotation);
+    bool TryPlaceRoomRandomly(const Room & otherRoom, std::mt19937 & gen);
 
     [[ nodiscard ]]
     Tile & at(int x, int y);

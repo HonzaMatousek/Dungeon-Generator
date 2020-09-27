@@ -17,6 +17,8 @@
 #include "Palette.h"
 #include "../Furniture/SingleFurniture.h"
 #include "../Dungeon/CircleRoom.h"
+#include "RoomGroup.h"
+#include "../Dungeon/DungeonRoom.h"
 
 void Parser::Run(const std::string &fileName) {
     std::ifstream inFile(fileName);
@@ -34,6 +36,7 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
     std::unique_ptr<Room> mask;
     std::unique_ptr<Dungeon> dungeon;
     std::vector<std::pair<int, std::string>> roomsToGenerate;
+    std::map<std::string, RoomGroup> roomGroups;
     while(std::getline(input, line)) {
         std::string command;
         std::istringstream lineStream(line);
@@ -61,6 +64,11 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             else if(roomType == "circle") {
                 palette.roomProvider.RegisterRoom(std::make_unique<CircleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
             }
+        }
+        else if(command == "group") {
+            std::string roomName;
+            lineStream >> roomName;
+            RunRoomGroup(input, roomGroups, roomName);
         }
         else if(command == "furniture") {
             std::string furnitureType;
@@ -145,8 +153,22 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             std::random_device rd;
             std::mt19937 gen(rd());
             for(auto const & [ roomCount, paletteName ] : roomsToGenerate) {
-                Palette & usedPalette = palettes[paletteName];
-                dungeon->GenerateDungeon(GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider, roomCount, mask), gen);
+                if(palettes.find(paletteName) == palettes.end()) {
+                    RoomGroup &roomGroup = roomGroups[paletteName];
+                    while(true) {
+                        Dungeon groupDungeon(dungeonWidth, dungeonHeight, 0, 0);
+                        for (const auto &roomElement : roomGroup.rooms) {
+                            Palette &usedPalette = palettes[roomElement.roomName];
+                            groupDungeon.GenerateDungeon(GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider, roomElement.roomCount, mask), gen);
+                            groupDungeon.FinishDungeon();
+                        }
+                        if(dungeon->TryPlaceRoomRandomly(DungeonRoom(groupDungeon), gen)) break;
+                    }
+                }
+                else {
+                    Palette &usedPalette = palettes[paletteName];
+                    dungeon->GenerateDungeon(GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider, roomCount, mask), gen);
+                }
             }
             dungeon->FinishDungeon();
         }
@@ -207,6 +229,27 @@ void Parser::RunFurnitureThen(std::istream &input, const std::shared_ptr<Furnitu
             if(then == "then") {
                 RunFurnitureThen(input, furnitureProvider->LastFurnitureStyle()->getSubFurnitures());
             }
+        }
+        else if(command == "end") {
+            return;
+        }
+    }
+}
+
+void Parser::RunRoomGroup(std::istream &input, std::map<std::string, RoomGroup>& roomGroups, const std::string & roomName) {
+    std::string line;
+    while(std::getline(input, line)) {
+        std::string command;
+        std::istringstream lineStream(line);
+        lineStream >> command;
+        if(command == "#") {
+            // do nothing
+        }
+        else if(command == "rooms") {
+            int roomCount;
+            std::string roomPalette;
+            lineStream >> roomCount >> roomPalette;
+            roomGroups[roomName].rooms.push_back({roomCount, roomPalette });
         }
         else if(command == "end") {
             return;
