@@ -154,15 +154,19 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             std::mt19937 gen(rd());
             for(auto const & [ roomCount, paletteName ] : roomsToGenerate) {
                 if(palettes.find(paletteName) == palettes.end()) {
-                    RoomGroup &roomGroup = roomGroups[paletteName];
-                    while(true) {
-                        Dungeon groupDungeon(dungeonWidth, dungeonHeight, 0, 0);
-                        for (const auto &roomElement : roomGroup.rooms) {
-                            Palette &usedPalette = palettes[roomElement.roomName];
-                            groupDungeon.GenerateDungeon(GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider, roomElement.roomCount, mask), gen);
-                            groupDungeon.FinishDungeon();
+                    for(int i = 0; i < roomCount; i++) {
+                        RoomGroup &roomGroup = roomGroups[paletteName];
+                        for (int tryCounter = 0; tryCounter < 1000; tryCounter++) {
+                            Dungeon groupDungeon(dungeonWidth, dungeonHeight, 0, 0);
+                            for (const auto &roomElement : roomGroup.rooms) {
+                                Palette &usedPalette = palettes[roomElement.roomName];
+                                groupDungeon.GenerateDungeon(
+                                        GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider,
+                                                        roomElement.roomCount, mask), gen);
+                                groupDungeon.FinishDungeon();
+                            }
+                            if (dungeon->TryPlaceRoomRandomly(DungeonRoom(groupDungeon), gen)) break;
                         }
-                        if(dungeon->TryPlaceRoomRandomly(DungeonRoom(groupDungeon), gen)) break;
                     }
                 }
                 else {

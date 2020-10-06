@@ -23,6 +23,16 @@ palette forest
     end
 end
 
+palette castle
+    room 10 rectangle 10 10 0.3 0.5
+    room 5 rectangle 8 8 0.3 0.4
+    room 1 rectangle 20 20 0.3 0.5
+
+    furniture 2 monster
+    furniture 1 empty
+    furniture 1 chest
+end
+
 group cave_system
     rooms 3 caves
 end
@@ -31,10 +41,14 @@ group mine_system
     rooms 5 mines
 end
 
-rooms 10 forest
-rooms 2 cave_system
-rooms 5 mine_system
+group castle_system
+    rooms 30 castle
+end
+
+rooms 5 forest
+rooms 1 cave_system
+rooms 1 castle_system
 
 dungeon 240 135
 
-render dungeon06b.tga
+render dungeon06c.tga
