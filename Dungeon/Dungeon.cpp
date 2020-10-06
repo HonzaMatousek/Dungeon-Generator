@@ -271,7 +271,9 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, TileCoord position, Ro
         for(auto const & door : room.doors) {
             doors.push_back(door.Transform(room, rotation) + position);
         }
-        roomDoorCounts.push_back(room.doors.size());
+        for(auto const & roomDoorCount : room.roomDoorCounts) {
+            roomDoorCounts.push_back(roomDoorCount);
+        }
     }
     return !failed;
 }

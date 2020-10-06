@@ -6,6 +6,7 @@
 
 DungeonRoom::DungeonRoom(Dungeon &dungeon) : Room(dungeon.getWidth(), dungeon.getHeight(), 0, 0) {
     doors = dungeon.doors;
+    roomDoorCounts = dungeon.roomDoorCounts;
     tiles = dungeon.tiles;
     roomCounter = dungeon.roomCounter;
 }

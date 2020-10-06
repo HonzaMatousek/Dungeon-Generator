@@ -6,4 +6,5 @@ void Room::GenerateDoors(int count, std::mt19937 &gen) {
             doors.push_back(find);
         }
     }
+    roomDoorCounts.push_back(doors.size());
 }
