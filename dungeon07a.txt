@@ -1,0 +1,13 @@
+palette caves
+    room 1 cave 50 20 0.3 0.4
+    room 1 cave 30 30 0.3 0.4
+
+    furniture 1 monster
+    furniture 10 empty
+end
+
+rooms 100 caves
+
+dungeon 240 135
+
+render dungeon07a.tga

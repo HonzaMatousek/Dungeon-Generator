@@ -20,6 +20,7 @@ protected:
     double maxRoomRatio;
     std::vector<std::vector<Tile>> tiles;
     std::vector<TileCoord> doors;
+    std::vector<int> roomDoorCounts;
     void WalkTiles(const std::function<void(const TileCoord &)> & function);
     bool WalkTilesChecked(const std::function<bool(const TileCoord &)> & function);
     TileCoord WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function);
@@ -46,6 +47,7 @@ public:
     void Noise(std::mt19937 & gen);
     void Blur(int floorThreshold, int wallThreshold);
     bool PlaceRoom(const Room & room, int roomNumber, TileCoord position, Rotation rotation);
+    void RemoveLastRoom();
     bool TryPlaceRoomRandomly(const Room & otherRoom, std::mt19937 & gen);
     TileCoord FindMinimumBB() const;
     TileCoord FindMaximumBB() const;

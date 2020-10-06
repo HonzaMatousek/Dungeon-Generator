@@ -37,14 +37,27 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
             });
         }
     }
+
     int generatedRoomCounter = 0;
-    for(int tryCounter = 0; generatedRoomCounter < generatorPreset.MaxRoomCount() && tryCounter < 50 * generatorPreset.MaxRoomCount(); tryCounter++) {
-        auto otherRoom = generatorPreset.RandomRoom(gen);
-        otherRoom->Generate(gen);
-        if(TryPlaceRoomRandomly(*otherRoom, gen)) {
-            generatedRoomCounter += otherRoom->roomCounter;
+    const int tryCountLimit = 100;
+    int failureCounter = 0;
+    const int failureLimit = 5;
+    for(; generatedRoomCounter < generatorPreset.MaxRoomCount() && failureCounter < failureLimit;) {
+        for (int tryCounter = 0; tryCounter < tryCountLimit && failureCounter < failureLimit; tryCounter++) {
+            auto otherRoom = generatorPreset.RandomRoom(gen);
+            otherRoom->Generate(gen);
+            if (TryPlaceRoomRandomly(*otherRoom, gen)) {
+                generatedRoomCounter += otherRoom->roomCounter;
+                break;
+            }
+            if (tryCounter == tryCountLimit - 1) {
+                RemoveLastRoom();
+                tryCounter = 0;
+                failureCounter++;
+            }
         }
     }
+
     for(auto const & door : doors) {
         // change wall to door
         at(door).type = TileType::DOOR;
@@ -258,6 +271,7 @@ bool Dungeon::PlaceRoom(const Room &room, int roomNumber, TileCoord position, Ro
         for(auto const & door : room.doors) {
             doors.push_back(door.Transform(room, rotation) + position);
         }
+        roomDoorCounts.push_back(room.doors.size());
     }
     return !failed;
 }
@@ -429,4 +443,19 @@ TileCoord Dungeon::FindMaximumBB() const {
         }
     });
     return result;
+}
+
+void Dungeon::RemoveLastRoom() {
+    WalkTiles([&](const TileCoord & tileCoord) {
+        if(at(tileCoord).type != TileType::WALL && at(tileCoord).roomNumber >= roomCounter) {
+            at(tileCoord).type = TileType::WALL;
+            at(tileCoord).roomNumber = 0;
+        }
+    });
+    if(!roomDoorCounts.empty()) {
+        int doorsToRemove = roomDoorCounts.back();
+        roomDoorCounts.pop_back();
+        doors.resize(doors.size() - doorsToRemove);
+    }
+    roomCounter--;
 }
