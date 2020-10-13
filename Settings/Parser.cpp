@@ -169,6 +169,9 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                         for (int tryCounter = 0; tryCounter < 1000; tryCounter++) {
                             Dungeon groupDungeon(dungeonWidth, dungeonHeight);
                             for (const auto &roomElement : roomGroup.rooms) {
+                                if(palettes.find(roomElement.roomName) == palettes.end()) {
+                                    throw std::runtime_error("Unknown palette " + roomElement.roomName);
+                                }
                                 Palette &usedPalette = palettes[roomElement.roomName];
                                 groupDungeon.GenerateDungeon(
                                         GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider,
