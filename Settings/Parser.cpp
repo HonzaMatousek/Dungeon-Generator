@@ -165,7 +165,8 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                                                         roomElement.roomCount, mask), gen);
                                 groupDungeon.FinishDungeon(true);
                             }
-                            if (dungeon->TryPlaceRoomRandomly(DungeonRoom(groupDungeon), gen)) break;
+                            std::unique_ptr<Room> dungeonRoom = std::make_unique<DungeonRoom>(groupDungeon);
+                            if (dungeon->TryPlaceRoomRandomly(std::move(dungeonRoom), gen)) break;
                         }
                     }
                 }

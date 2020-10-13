@@ -22,6 +22,6 @@ int GeneratorPreset::MaxRoomCount() const {
     return maxRoomCount;
 }
 
-std::unique_ptr<Room> GeneratorPreset::GetMask() const {
-    return mask ? mask->Clone() : nullptr;
+const std::unique_ptr<Room> & GeneratorPreset::GetMask() const {
+    return mask;
 }

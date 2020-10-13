@@ -21,7 +21,7 @@ Dungeon::Dungeon(int width, int height) : map(width, height) {
 
 void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen) {
     if(rooms.empty()) {
-        if(auto mask = generatorPreset.GetMask()) {
+        if(auto & mask = generatorPreset.GetMask()) {
             mask->Generate(gen);
             mask->map.WalkTiles([&](const TileCoord & tileCoord) {
                 if(mask->map.at(tileCoord).type == TileType::WALL) {
@@ -42,7 +42,7 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
         for (int tryCounter = 0; tryCounter < tryCountLimit && failureCounter < failureLimit; tryCounter++) {
             auto otherRoom = generatorPreset.RandomRoom(gen);
             otherRoom->Generate(gen);
-            if (TryPlaceRoomRandomly(*otherRoom, gen)) {
+            if (TryPlaceRoomRandomly((std::unique_ptr<Room> &&) std::move(otherRoom), gen)) {
                 generatedRoomCounter += 1;
                 failureCounter = 0;
                 std::unique_ptr<FurnitureStyle> furnitureStyle = generatorPreset.RandomFurnitureStyle(gen);
@@ -91,11 +91,11 @@ int Dungeon::CountNeighbors8OfOtherRoom(const TileCoord & tileCoord, TileType ty
 
 /**/
 
-bool Dungeon::PlaceRoom(const Room &room, TileCoord position, Rotation rotation) {
-    bool result = room.map.WalkTilesChecked([&] (const TileCoord & tileCoord) {
+bool Dungeon::PlaceRoom(std::unique_ptr<Room> && room, TileCoord position, Rotation rotation) {
+    bool result = room->map.WalkTilesChecked([&] (const TileCoord & tileCoord) {
         //auto d = tileCoord.Transform(*this, rotation) + position;
         auto d = tileCoord + position;
-        if(((d.y > map.GetHeight() - 2 || d.x > map.GetWidth() - 2 || d.y < 1 || d.x < 1) && room.map.at(tileCoord).type != TileType::WALL) || (room.map.at(tileCoord).type != TileType::WALL && room.map.at(tileCoord).type != TileType::DOOR && (occupancyBitmap[d.y][d.x] || occupancyBitmap[d.y+1][d.x] || occupancyBitmap[d.y-1][d.x] || occupancyBitmap[d.y][d.x+1] || occupancyBitmap[d.y][d.x-1] || occupancyBitmap[d.y+1][d.x+1] || occupancyBitmap[d.y-1][d.x+1] || occupancyBitmap[d.y+1][d.x-1] || occupancyBitmap[d.y-1][d.x-1]))) {
+        if(((d.y > map.GetHeight() - 2 || d.x > map.GetWidth() - 2 || d.y < 1 || d.x < 1) && room->map.at(tileCoord).type != TileType::WALL) || (room->map.at(tileCoord).type != TileType::WALL && room->map.at(tileCoord).type != TileType::DOOR && (occupancyBitmap[d.y][d.x] || occupancyBitmap[d.y+1][d.x] || occupancyBitmap[d.y-1][d.x] || occupancyBitmap[d.y][d.x+1] || occupancyBitmap[d.y][d.x-1] || occupancyBitmap[d.y+1][d.x+1] || occupancyBitmap[d.y-1][d.x+1] || occupancyBitmap[d.y+1][d.x-1] || occupancyBitmap[d.y-1][d.x-1]))) {
             // cannot place room here
             return false;
         }
@@ -107,14 +107,14 @@ bool Dungeon::PlaceRoom(const Room &room, TileCoord position, Rotation rotation)
         return false;
     }
 
-    room.map.WalkTiles([&] (const TileCoord & tileCoord) {
+    room->map.WalkTiles([&] (const TileCoord & tileCoord) {
         auto d = tileCoord + position;
-        if(room.map.at(tileCoord).type != TileType::WALL && room.map.at(tileCoord).type != TileType::DOOR) {
+        if(room->map.at(tileCoord).type != TileType::WALL && room->map.at(tileCoord).type != TileType::DOOR) {
             occupancyBitmap[d.y][d.x] = true;
         }
     });
 
-    rooms.push_back(room.Clone());
+    rooms.emplace_back(std::move(room));
     rooms.back()->position = position;
 
     return true;
@@ -172,14 +172,14 @@ void Dungeon::FinishDungeon(bool preserveDoors) {
     }
 }
 
-bool Dungeon::TryPlaceRoomRandomly(const Room &otherRoom, std::mt19937 & gen) {
+bool Dungeon::TryPlaceRoomRandomly(std::unique_ptr<Room> && otherRoom, std::mt19937 & gen) {
     if(rooms.empty()) {
-        auto minbb = otherRoom.map.FindMinimumBB();
-        auto maxbb = otherRoom.map.FindMaximumBB();
+        auto minbb = otherRoom->map.FindMinimumBB();
+        auto maxbb = otherRoom->map.FindMaximumBB();
         auto randomx = std::uniform_int_distribution(-minbb.x, map.GetWidth() - maxbb.x);
         auto randomy = std::uniform_int_distribution(-minbb.y, map.GetHeight() - maxbb.y);
         for(int tryCounter = 0; tryCounter < 1000; tryCounter++) {
-            if (PlaceRoom(otherRoom, {randomx(gen), randomy(gen)}, Random::PickRandomRotation(gen))) {
+            if (PlaceRoom(std::move(otherRoom), {randomx(gen), randomy(gen)}, Random::PickRandomRotation(gen))) {
                 return true;
             }
         }
@@ -188,10 +188,10 @@ bool Dungeon::TryPlaceRoomRandomly(const Room &otherRoom, std::mt19937 & gen) {
     else {
         const auto & room = Random::PickRandomElement(rooms, gen);
         const auto & door = Random::PickRandomElement(room->GetDoors(), gen);
-        for (const auto &otherRoomDoor : otherRoom.GetDoors()) {
+        for (const auto &otherRoomDoor : otherRoom->GetDoors()) {
             Rotation otherRotation = Random::PickRandomRotation(gen);
             TileCoord d = otherRoomDoor; //otherRoomDoor.Transform(otherRoom, otherRotation);
-            if (PlaceRoom(otherRoom, door - d + room->position, otherRotation)) {
+            if (PlaceRoom(std::move(otherRoom), door - d + room->position, otherRotation)) {
                 return true;
             }
         }

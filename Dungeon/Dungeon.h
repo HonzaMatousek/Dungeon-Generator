@@ -25,9 +25,9 @@ public:
     void GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen);
     void FinishDungeon(bool preserveDoors = false);
 
-    bool PlaceRoom(const Room & room, TileCoord position, Rotation rotation);
+    bool PlaceRoom(std::unique_ptr<Room> && room, TileCoord position, Rotation rotation);
     void RemoveLastRoom();
-    bool TryPlaceRoomRandomly(const Room & otherRoom, std::mt19937 & gen);
+    bool TryPlaceRoomRandomly(std::unique_ptr<Room> && otherRoom, std::mt19937 & gen);
 
     const Map &GetMap() const;
 };
