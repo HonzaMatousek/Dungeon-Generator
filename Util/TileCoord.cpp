@@ -6,7 +6,8 @@
 #include "../Dungeon/Dungeon.h"
 
 TileCoord TileCoord::Transform(const Dungeon &dungeon, Rotation rotation) const {
-    switch(rotation) {
+    return { x, y };
+    /*switch(rotation) {
         case Rotation::D0:
             return { x, y };
         case Rotation::D90:
@@ -15,6 +16,6 @@ TileCoord TileCoord::Transform(const Dungeon &dungeon, Rotation rotation) const 
             return { dungeon.getWidth() - 1 - x, dungeon.getHeight() - 1 - y };
         case Rotation::D270:
             return { dungeon.getHeight() - 1 - y, x };
-    }
+    }*/
 }
 

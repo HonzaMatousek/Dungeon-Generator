@@ -7,7 +7,7 @@ class SingleFurniture : public FurnitureStyle {
 public:
     SingleFurniture(TileType furnitureTileType);
 
-    void FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19937 &gen) const override;
+    void FurnitureRoom(Room & room, std::mt19937 &gen) const override;
 
     std::unique_ptr<FurnitureStyle> Clone() const override;
 };

@@ -149,7 +149,7 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             if(!lineStream) {
                 throw std::runtime_error("Dungeon command failed");
             }
-            dungeon = std::make_unique<Dungeon>(dungeonWidth, dungeonHeight, 0, 0);
+            dungeon = std::make_unique<Dungeon>(dungeonWidth, dungeonHeight);
             std::random_device rd;
             std::mt19937 gen(rd());
             for(auto const & [ roomCount, paletteName ] : roomsToGenerate) {
@@ -157,7 +157,7 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                     for(int i = 0; i < roomCount; i++) {
                         RoomGroup &roomGroup = roomGroups[paletteName];
                         for (int tryCounter = 0; tryCounter < 1000; tryCounter++) {
-                            Dungeon groupDungeon(dungeonWidth, dungeonHeight, 0, 0);
+                            Dungeon groupDungeon(dungeonWidth, dungeonHeight);
                             for (const auto &roomElement : roomGroup.rooms) {
                                 Palette &usedPalette = palettes[roomElement.roomName];
                                 groupDungeon.GenerateDungeon(
@@ -186,7 +186,7 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             else {
                 renderer = std::make_unique<ImageRenderer>(renderType);
             }
-            renderer->Render(*dungeon);
+            renderer->Render(dungeon->GetMap());
         }
     }
 }

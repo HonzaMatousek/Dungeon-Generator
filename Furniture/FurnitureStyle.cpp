@@ -4,6 +4,7 @@
 
 #include "FurnitureStyle.h"
 #include "FurnitureProvider.h"
+#include "../Dungeon/Room.h"
 
 std::shared_ptr<FurnitureProvider> FurnitureStyle::getSubFurnitures() const {
     return subFurnitures;
@@ -11,8 +12,8 @@ std::shared_ptr<FurnitureProvider> FurnitureStyle::getSubFurnitures() const {
 
 FurnitureStyle::FurnitureStyle() : subFurnitures(std::make_shared<FurnitureProvider>()) {}
 
-void FurnitureStyle::FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19937 &gen) const {
+void FurnitureStyle::FurnitureRoom(Room & room, std::mt19937 &gen) const {
     if(!subFurnitures->Empty()) {
-        subFurnitures->RandomFurnitureStyle(gen)->FurnitureRoom(dungeon, roomNumber, gen);
+        subFurnitures->RandomFurnitureStyle(gen)->FurnitureRoom(room, gen);
     }
 }

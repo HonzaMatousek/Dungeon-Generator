@@ -10,7 +10,7 @@ class FurnitureStyle {
 public:
     FurnitureStyle();
 
-    virtual void FurnitureRoom(Dungeon & dungeon, int roomNumber, std::mt19937 & gen) const;
+    virtual void FurnitureRoom(Room & room, std::mt19937 & gen) const;
     virtual std::unique_ptr<FurnitureStyle> Clone() const = 0;
 
     [[ nodiscard ]]

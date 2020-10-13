@@ -4,11 +4,11 @@
 
 #include "DungeonRoom.h"
 
-DungeonRoom::DungeonRoom(Dungeon &dungeon) : Room(dungeon.getWidth(), dungeon.getHeight(), 0, 0) {
-    doors = dungeon.doors;
+DungeonRoom::DungeonRoom(Dungeon &dungeon) : Room(dungeon.map.GetWidth(), dungeon.map.GetHeight(), 0, 0) {
+    /*doors = dungeon.doors;
     roomDoorCounts = dungeon.roomDoorCounts;
     tiles = dungeon.tiles;
-    roomCounter = dungeon.roomCounter;
+    roomCounter = dungeon.roomCounter;*/
 }
 
 void DungeonRoom::Generate(std::mt19937 &gen) {}

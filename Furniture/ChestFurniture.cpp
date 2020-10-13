@@ -1,10 +1,11 @@
 #include "ChestFurniture.h"
+#include "../Dungeon/Room.h"
 
-void ChestFurniture::FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19937 &gen) const {
-    if(TileCoord find = dungeon.FindRandomTileNearEdge(roomNumber, TileType::FLOOR, gen)) {
-        dungeon.at(find).type = TileType::CHEST;
+void ChestFurniture::FurnitureRoom(Room & room, std::mt19937 &gen) const {
+    if(TileCoord find = room.map.FindRandomTileNearEdge(TileType::FLOOR, gen)) {
+        room.map.at(find).type = TileType::CHEST;
     }
-    FurnitureStyle::FurnitureRoom(dungeon, roomNumber, gen);
+    FurnitureStyle::FurnitureRoom(room, gen);
 }
 
 std::unique_ptr<FurnitureStyle> ChestFurniture::Clone() const {

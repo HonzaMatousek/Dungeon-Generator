@@ -6,15 +6,15 @@
 
 OstreamRenderer::OstreamRenderer(std::ostream &ostream) : ostream(ostream) {}
 
-void OstreamRenderer::Render(const Dungeon &dungeon) {
-    for (int row = 0; row < dungeon.getHeight(); row++) {
-        for (int col = 0; col < dungeon.getWidth(); col++) {
-            switch(dungeon.at(col, row).type) {
+void OstreamRenderer::Render(const Map & map) {
+    for (int row = 0; row < map.GetHeight(); row++) {
+        for (int col = 0; col < map.GetWidth(); col++) {
+            switch(map.at(col, row).type) {
                 case TileType::WALL:
-                    if(dungeon.at(col, row).roomNumber == -1) {
+                    if(map.at(col, row).roomNumber == -1) {
                         ostream << '@';
                     }
-                    else if(dungeon.CountNeighbors8({ col, row }, TileType::WALL, true) > 7) {
+                    else if(map.CountNeighbors8({ col, row }, TileType::WALL, true) > 7) {
                         ostream << ' ';
                     }
                     else {
@@ -23,11 +23,11 @@ void OstreamRenderer::Render(const Dungeon &dungeon) {
                     break;
                 case TileType::FLOOR:
                     //std::cout << (char)('0' + tiles[row][col].roomNumber);
-                    if(dungeon.at(col, row).roomNumber == 0) {
-                        ostream << "\033[38;5;" << (30 + (dungeon.at(col, row).roomNumber % 200)) << "m-\033[0m";
+                    if(map.at(col, row).roomNumber == 0) {
+                        ostream << "\033[38;5;" << (30 + (map.at(col, row).roomNumber % 200)) << "m-\033[0m";
                     }
                     else {
-                        ostream << "\033[38;5;" << (30 + (dungeon.at(col, row).roomNumber % 200)) << "m.\033[0m";
+                        ostream << "\033[38;5;" << (30 + (map.at(col, row).roomNumber % 200)) << "m.\033[0m";
                     }
                     break;
                 case TileType::DOOR:

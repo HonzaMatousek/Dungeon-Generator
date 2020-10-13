@@ -6,7 +6,17 @@ palette caves
     furniture 10 empty
 end
 
-rooms 100 caves
+palette castle
+    room 10 rectangle 10 10 0.3 0.5
+    room 5 rectangle 8 8 0.3 0.4
+    room 1 rectangle 20 20 0.3 0.5
+
+    furniture 2 monster
+    furniture 1 empty
+    furniture 1 chest
+end
+
+rooms 20 castle
 
 dungeon 240 135
 

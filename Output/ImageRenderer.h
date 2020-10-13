@@ -9,5 +9,5 @@ class ImageRenderer : public Renderer {
     std::vector<char> tiles;
 public:
     explicit ImageRenderer(const std::string & outputFileName);
-    void Render(const Dungeon & dungeon) override;
+    void Render(const Map & map) override;
 };

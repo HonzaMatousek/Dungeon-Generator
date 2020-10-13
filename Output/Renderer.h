@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../Dungeon/Dungeon.h"
+#include "../Dungeon/Map.h"
 
 class Renderer {
 public:
-    virtual void Render(const Dungeon & dungeon) = 0;
+    virtual void Render(const Map & map) = 0;
 };

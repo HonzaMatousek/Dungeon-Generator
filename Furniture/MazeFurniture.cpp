@@ -1,4 +1,5 @@
 #include "MazeFurniture.h"
+#include "../Dungeon/Room.h"
 
 inline const std::set<uint8_t> mazeNeighborMask{
         0b00000000,
@@ -27,7 +28,7 @@ inline const std::set<uint8_t> directPathsNeighborMask{
         // 0b11111111
 };
 
-void MazeFurniture::FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19937 &gen) const {
+void MazeFurniture::FurnitureRoom(Room & room, std::mt19937 &gen) const {
     const std::set<uint8_t> * selectedMazeMask;
     switch(mazeType) {
         case MAZE:
@@ -37,11 +38,11 @@ void MazeFurniture::FurnitureRoom(Dungeon &dungeon, int roomNumber, std::mt19937
             selectedMazeMask = &directPathsNeighborMask;
             break;
     }
-    while(TileCoord tileCoord = dungeon.FindRandomTileDisconnectible(roomNumber, TileType::FLOOR, gen, *selectedMazeMask)) {
-        dungeon.at(tileCoord).type = TileType::WALL;
-        dungeon.at(tileCoord).roomNumber = 0;
+    while(TileCoord tileCoord = room.map.FindRandomTileDisconnectible(TileType::FLOOR, gen, *selectedMazeMask)) {
+        room.map.at(tileCoord).type = TileType::WALL;
+        room.map.at(tileCoord).roomNumber = 0;
     }
-    FurnitureStyle::FurnitureRoom(dungeon, roomNumber, gen);
+    FurnitureStyle::FurnitureRoom(room, gen);
 }
 
 std::unique_ptr<FurnitureStyle> MazeFurniture::Clone() const {
