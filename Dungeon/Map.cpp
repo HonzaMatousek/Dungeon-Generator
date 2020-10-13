@@ -1,5 +1,4 @@
 #include <set>
-#include <iostream>
 #include "Map.h"
 #include "../Util/Random.h"
 

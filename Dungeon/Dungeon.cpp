@@ -165,7 +165,7 @@ void Dungeon::FinishDungeon(bool preserveDoors) {
     if(!preserveDoors) {
         map.WalkTiles([&](const TileCoord &tileCoord) {
             if (map.at(tileCoord).type == TileType::DOOR) {
-                auto mask = map.MakeNeighborsBitMask(tileCoord, TileType::FLOOR);
+                auto mask = map.MakeNeighborsBitMask(tileCoord, TileType::WALL);
                 if (directPathsNeighborMask.find(mask) != directPathsNeighborMask.end()) {
                     map.at(tileCoord).type = TileType::WALL;
                 }
