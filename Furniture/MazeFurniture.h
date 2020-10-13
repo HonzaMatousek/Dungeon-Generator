@@ -10,9 +10,10 @@ enum MazeType {
 class MazeFurniture : public FurnitureStyle {
     MazeType mazeType;
 public:
-    MazeFurniture(MazeType mazeType);
+    explicit MazeFurniture(MazeType mazeType);
 
     void FurnitureRoom(Room & room, std::mt19937 &gen) const override;
 
+    [[ nodiscard ]]
     std::unique_ptr<FurnitureStyle> Clone() const override;
 };

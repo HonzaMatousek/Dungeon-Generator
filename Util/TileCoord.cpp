@@ -1,7 +1,3 @@
-//
-// Created by honza on 06.09.20.
-//
-
 #include "TileCoord.h"
 #include "../Dungeon/Dungeon.h"
 

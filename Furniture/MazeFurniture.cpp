@@ -1,7 +1,7 @@
 #include "MazeFurniture.h"
 #include "../Dungeon/Room.h"
 
-inline const std::set<uint8_t> mazeNeighborMask{
+inline const std::set<uint8_t> mazeNeighborMask { /* NOLINT */
         0b00000000,
         0b00000001, 0b00000100, 0b00010000, 0b01000000,
         // 0b00000001, 0b00000010, 0b00000100, 0b00001000, 0b00010000, 0b00100000, 0b01000000, 0b10000000,
@@ -15,7 +15,7 @@ inline const std::set<uint8_t> mazeNeighborMask{
         // 0b11111111
 };
 
-inline const std::set<uint8_t> directPathsNeighborMask{
+inline const std::set<uint8_t> directPathsNeighborMask { /* NOLINT */
         0b00000000,
         0b00000001, 0b00000010, 0b00000100, 0b00001000, 0b00010000, 0b00100000, 0b01000000, 0b10000000,
         0b00000011, 0b00000110, 0b00001100, 0b00011000, 0b00110000, 0b01100000, 0b11000000, 0b10000001,

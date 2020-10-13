@@ -91,7 +91,7 @@ int Dungeon::CountNeighbors8OfOtherRoom(const TileCoord & tileCoord, TileType ty
 
 /**/
 
-bool Dungeon::PlaceRoom(std::unique_ptr<Room> && room, TileCoord position, Rotation rotation) {
+bool Dungeon::PlaceRoom(std::unique_ptr<Room> && room, TileCoord position, Rotation) {
     bool result = room->map.WalkTilesChecked([&] (const TileCoord & tileCoord) {
         //auto d = tileCoord.Transform(*this, rotation) + position;
         auto d = tileCoord + position;
@@ -134,7 +134,7 @@ void Dungeon::RemoveLastRoom() {
     rooms.pop_back();
 }
 
-inline const std::set<uint8_t> directPathsNeighborMask{
+inline const std::set<uint8_t> directPathsNeighborMask{ /* NOLINT */
         0b00000000,
         0b00000001, 0b00000010, 0b00000100, 0b00001000, 0b00010000, 0b00100000, 0b01000000, 0b10000000,
         0b00000011, 0b00000110, 0b00001100, 0b00011000, 0b00110000, 0b01100000, 0b11000000, 0b10000001,
@@ -174,12 +174,12 @@ void Dungeon::FinishDungeon(bool preserveDoors) {
 
 bool Dungeon::TryPlaceRoomRandomly(std::unique_ptr<Room> && otherRoom, std::mt19937 & gen) {
     if(rooms.empty()) {
-        auto minbb = otherRoom->map.FindMinimumBB();
-        auto maxbb = otherRoom->map.FindMaximumBB();
-        auto randomx = std::uniform_int_distribution(-minbb.x, map.GetWidth() - maxbb.x);
-        auto randomy = std::uniform_int_distribution(-minbb.y, map.GetHeight() - maxbb.y);
+        auto minBB = otherRoom->map.FindMinimumBB();
+        auto maxBB = otherRoom->map.FindMaximumBB();
+        auto randomX = std::uniform_int_distribution(-minBB.x, map.GetWidth() - maxBB.x);
+        auto randomY = std::uniform_int_distribution(-minBB.y, map.GetHeight() - maxBB.y);
         for(int tryCounter = 0; tryCounter < 1000; tryCounter++) {
-            if (PlaceRoom(std::move(otherRoom), {randomx(gen), randomy(gen)}, Random::PickRandomRotation(gen))) {
+            if (PlaceRoom(std::move(otherRoom), {randomX(gen), randomY(gen)}, Random::PickRandomRotation(gen))) {
                 return true;
             }
         }

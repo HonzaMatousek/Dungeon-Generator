@@ -29,5 +29,6 @@ public:
     void RemoveLastRoom();
     bool TryPlaceRoomRandomly(std::unique_ptr<Room> && otherRoom, std::mt19937 & gen);
 
+    [[ nodiscard ]]
     const Map &GetMap() const;
 };

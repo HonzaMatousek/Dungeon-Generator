@@ -18,7 +18,11 @@ public:
 
     std::unique_ptr<Room> RandomRoom(std::mt19937 & gen) const;
     std::unique_ptr<FurnitureStyle> RandomFurnitureStyle(std::mt19937 & gen) const;
+
+    [[ nodiscard ]]
     const std::unique_ptr<Room> & GetMask() const;
+
+    [[ nodiscard ]]
     int MaxRoomCount() const;
 };
 

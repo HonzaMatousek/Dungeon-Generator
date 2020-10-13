@@ -36,29 +36,12 @@ int Map::getHeight() const {
     return height;
 }
 
-void Map::WalkTiles(const std::function<void(const TileCoord &)> & function) {
-    for (int row = 0; row < height; row++) {
-        for (int col = 0; col < width; col++) {
-            function({ col, row });
-        }
-    }
-}
-
 void Map::WalkTiles(const std::function<void(const TileCoord &)> & function) const {
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             function({ col, row });
         }
     }
-}
-
-bool Map::WalkTilesChecked(const std::function<bool(const TileCoord &)> & function) {
-    for (int col = 0; col < width; col++) {
-        for (int row = 0; row < height; row++) {
-            if(!function({ col, row })) return false;
-        }
-    }
-    return true;
 }
 
 bool Map::WalkTilesChecked(const std::function<bool(const TileCoord &)> & function) const {
@@ -68,17 +51,6 @@ bool Map::WalkTilesChecked(const std::function<bool(const TileCoord &)> & functi
         }
     }
     return true;
-}
-
-TileCoord Map::WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) {
-    for (int col = 0; col < width; col++) {
-        for (int row = 0; row < height; row++) {
-            if(auto tileCoord = function({ col, row })) {
-                return tileCoord;
-            }
-        }
-    }
-    return TileCoord::Invalid();
 }
 
 TileCoord Map::WalkTilesUntilValid(const std::function<TileCoord(const TileCoord &)> & function) const {

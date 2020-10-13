@@ -1,7 +1,3 @@
-//
-// Created by honza on 27.09.20.
-//
-
 #include "DungeonRoom.h"
 
 DungeonRoom::DungeonRoom(Dungeon &dungeon) : Room(dungeon.map.GetWidth(), dungeon.map.GetHeight(), 0, 0) {

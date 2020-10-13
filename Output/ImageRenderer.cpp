@@ -3,16 +3,16 @@
 
 ImageRenderer::ImageRenderer(const std::string & outputFileName) : outputFileName(outputFileName) {
     std::ifstream tilesFile("dungeon-tiles.tga", std::ios::binary);
-    char TGAheader[18];
-    tilesFile.read(TGAheader, sizeof(TGAheader));
+    char TGAHeader[18];
+    tilesFile.read(TGAHeader, sizeof(TGAHeader));
     tiles.resize(64 * 64 * 3);
     tilesFile.read(tiles.data(), tiles.size());
 }
 
 void ImageRenderer::Render(const Map & map) {
     std::ofstream outputFile(outputFileName, std::ios::binary);
-    unsigned char TGAheader[18] = {0,0,2, 0,0, 0,0, 16, 0,0, 0,0, (unsigned char)((16 * map.GetWidth()) & 0xFFu), (unsigned char)((16 * map.GetWidth()) >> 8u), (unsigned char)((16 * map.GetHeight()) & 0xFFu), (unsigned char)((16 * map.GetHeight()) >> 8u), 24, 0x20};
-    outputFile.write((char *)TGAheader, sizeof(TGAheader));
+    unsigned char TGAHeader[18] = {0, 0, 2, 0, 0, 0, 0, 16, 0, 0, 0, 0, (unsigned char)((16 * map.GetWidth()) & 0xFFu), (unsigned char)((16 * map.GetWidth()) >> 8u), (unsigned char)((16 * map.GetHeight()) & 0xFFu), (unsigned char)((16 * map.GetHeight()) >> 8u), 24, 0x20};
+    outputFile.write((char *)TGAHeader, sizeof(TGAHeader));
     for (int row = 0; row < map.GetHeight(); row++) {
         for(int line = 0; line < 16; line++) {
             for (int col = 0; col < map.GetWidth(); col++) {

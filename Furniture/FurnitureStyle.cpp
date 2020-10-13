@@ -1,7 +1,3 @@
-//
-// Created by honza on 06.09.20.
-//
-
 #include "FurnitureStyle.h"
 #include "FurnitureProvider.h"
 #include "../Dungeon/Room.h"

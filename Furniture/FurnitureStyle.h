@@ -11,6 +11,8 @@ public:
     FurnitureStyle();
 
     virtual void FurnitureRoom(Room & room, std::mt19937 & gen) const;
+
+    [[ nodiscard ]]
     virtual std::unique_ptr<FurnitureStyle> Clone() const = 0;
 
     [[ nodiscard ]]

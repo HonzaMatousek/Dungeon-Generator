@@ -10,11 +10,10 @@ protected:
     double maxRoomRatio;
     std::vector<TileCoord> doors;
 public:
+    [[ nodiscard ]]
     const std::vector<TileCoord> &GetDoors() const;
-    TileCoord position;
+    TileCoord position = {0,0};
 
-protected:
-    std::vector<std::shared_ptr<Room>> rooms;
 public:
     Room(int width, int height, double minRoomRatio, double maxRoomRatio);
     virtual void Generate(std::mt19937 & gen) = 0;
