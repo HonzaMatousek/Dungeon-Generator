@@ -23,7 +23,7 @@ protected:
 public:
     Dungeon(int width, int height);
     void GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19937 & gen);
-    void FinishDungeon();
+    void FinishDungeon(bool preserveDoors = false);
 
     bool PlaceRoom(const Room & room, TileCoord position, Rotation rotation);
     void RemoveLastRoom();

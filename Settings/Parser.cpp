@@ -163,7 +163,7 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                                 groupDungeon.GenerateDungeon(
                                         GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider,
                                                         roomElement.roomCount, mask), gen);
-                                groupDungeon.FinishDungeon();
+                                groupDungeon.FinishDungeon(true);
                             }
                             if (dungeon->TryPlaceRoomRandomly(DungeonRoom(groupDungeon), gen)) break;
                         }

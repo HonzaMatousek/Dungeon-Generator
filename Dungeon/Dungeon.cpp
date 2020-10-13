@@ -95,7 +95,7 @@ bool Dungeon::PlaceRoom(const Room &room, TileCoord position, Rotation rotation)
     bool result = room.map.WalkTilesChecked([&] (const TileCoord & tileCoord) {
         //auto d = tileCoord.Transform(*this, rotation) + position;
         auto d = tileCoord + position;
-        if(d.y > map.GetHeight() - 2 || d.x > map.GetWidth() - 2 || d.y < 1 || d.x < 1 || (room.map.at(tileCoord).type != TileType::WALL && room.map.at(tileCoord).type != TileType::DOOR && (occupancyBitmap[d.y][d.x] || occupancyBitmap[d.y+1][d.x] || occupancyBitmap[d.y-1][d.x] || occupancyBitmap[d.y][d.x+1] || occupancyBitmap[d.y][d.x-1] || occupancyBitmap[d.y+1][d.x+1] || occupancyBitmap[d.y-1][d.x+1] || occupancyBitmap[d.y+1][d.x-1] || occupancyBitmap[d.y-1][d.x-1]))) {
+        if(((d.y > map.GetHeight() - 2 || d.x > map.GetWidth() - 2 || d.y < 1 || d.x < 1) && room.map.at(tileCoord).type != TileType::WALL) || (room.map.at(tileCoord).type != TileType::WALL && room.map.at(tileCoord).type != TileType::DOOR && (occupancyBitmap[d.y][d.x] || occupancyBitmap[d.y+1][d.x] || occupancyBitmap[d.y-1][d.x] || occupancyBitmap[d.y][d.x+1] || occupancyBitmap[d.y][d.x-1] || occupancyBitmap[d.y+1][d.x+1] || occupancyBitmap[d.y-1][d.x+1] || occupancyBitmap[d.y+1][d.x-1] || occupancyBitmap[d.y-1][d.x-1]))) {
             // cannot place room here
             return false;
         }
@@ -126,7 +126,9 @@ void Dungeon::RemoveLastRoom() {
     const auto & room = rooms.back();
     room->map.WalkTiles([&] (const TileCoord & tileCoord) {
         auto d = tileCoord + room->position;
-        occupancyBitmap[d.y][d.x] = false;
+        if(room->map.at(tileCoord).type != TileType::WALL && room->map.at(tileCoord).type != TileType::DOOR) {
+            occupancyBitmap[d.y][d.x] = false;
+        }
     });
 
     rooms.pop_back();
@@ -145,7 +147,7 @@ inline const std::set<uint8_t> directPathsNeighborMask{
         // 0b11111111
 };
 
-void Dungeon::FinishDungeon() {
+void Dungeon::FinishDungeon(bool preserveDoors) {
     for(const auto & room : rooms) {
         room->map.WalkTiles([&] (const TileCoord & tileCoord) {
             auto d = tileCoord + room->position;
@@ -158,14 +160,16 @@ void Dungeon::FinishDungeon() {
         });
     }
 
-    map.WalkTiles([&](const TileCoord & tileCoord) {
-        if(map.at(tileCoord).type == TileType::DOOR) {
-            auto mask = map.MakeNeighborsBitMask(tileCoord, TileType::FLOOR);
-            if(directPathsNeighborMask.find(mask) != directPathsNeighborMask.end()) {
-                map.at(tileCoord).type = TileType::WALL;
+    if(!preserveDoors) {
+        map.WalkTiles([&](const TileCoord &tileCoord) {
+            if (map.at(tileCoord).type == TileType::DOOR) {
+                auto mask = map.MakeNeighborsBitMask(tileCoord, TileType::FLOOR);
+                if (directPathsNeighborMask.find(mask) != directPathsNeighborMask.end()) {
+                    map.at(tileCoord).type = TileType::WALL;
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 bool Dungeon::TryPlaceRoomRandomly(const Room &otherRoom, std::mt19937 & gen) {

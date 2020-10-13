@@ -31,9 +31,9 @@ group mine_system
     rooms 5 mines
 end
 
-rooms 10 forest
-# rooms 2 cave_system
-# rooms 5 mine_system
+# rooms 10 forest
+rooms 2 cave_system
+rooms 5 mine_system
 
 dungeon 240 135
 

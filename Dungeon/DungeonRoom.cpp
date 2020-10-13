@@ -5,10 +5,12 @@
 #include "DungeonRoom.h"
 
 DungeonRoom::DungeonRoom(Dungeon &dungeon) : Room(dungeon.map.GetWidth(), dungeon.map.GetHeight(), 0, 0) {
-    /*doors = dungeon.doors;
-    roomDoorCounts = dungeon.roomDoorCounts;
-    tiles = dungeon.tiles;
-    roomCounter = dungeon.roomCounter;*/
+    for(auto const & room : dungeon.rooms) {
+        for(auto const & door : room->GetDoors()) {
+            doors.push_back(door + room->position);
+        }
+    }
+    map = dungeon.map;
 }
 
 void DungeonRoom::Generate(std::mt19937 &gen) {}

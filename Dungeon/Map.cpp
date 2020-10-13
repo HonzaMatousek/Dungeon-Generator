@@ -290,7 +290,7 @@ bool Map::KeepConnectedPart(TileType type, int minTileCount, int maxTileCount) {
 TileCoord Map::FindMinimumBB() const {
     TileCoord result {width, height};
     WalkTiles([&](const TileCoord & tileCoord) {
-        if(at(tileCoord).roomNumber > 0) {
+        if(at(tileCoord).type != TileType::WALL) {
             result.x = std::min(result.x, tileCoord.x);
             result.y = std::min(result.y, tileCoord.y);
         }
@@ -301,7 +301,7 @@ TileCoord Map::FindMinimumBB() const {
 TileCoord Map::FindMaximumBB() const {
     TileCoord result {0, 0};
     WalkTiles([&](const TileCoord & tileCoord) {
-        if(at(tileCoord).roomNumber > 0) {
+        if(at(tileCoord).type != TileType::WALL) {
             result.x = std::max(result.x, tileCoord.x);
             result.y = std::max(result.y, tileCoord.y);
         }
