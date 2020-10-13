@@ -1,4 +1,5 @@
 #include <set>
+#include <iostream>
 #include "Map.h"
 #include "../Util/Random.h"
 
@@ -167,10 +168,15 @@ TileCoord Map::FindRandomTile(TileType type, std::mt19937 &gen) const {
     return Random::PickRandomElement(roomTiles, gen);
 }
 
-TileCoord Map::FindRandomTileNearEdge(TileType type, std::mt19937 & gen) const {
+inline bool isBetween(int value, int minValue, int maxValue) {
+    return minValue <= value && value <= maxValue;
+}
+
+TileCoord Map::FindRandomTileNearEdge(TileType type, std::mt19937 & gen, int minCount, int maxCount) const {
     std::vector<TileCoord> roomTiles;
     WalkTiles([&](const TileCoord & tileCoord) {
-        if(at(tileCoord).type == type && CountNeighbors4(tileCoord, type, true) < 4) {
+        if(at(tileCoord).type == type && isBetween(CountNeighbors4(tileCoord, type, true), minCount, maxCount)) {
+            // std::cout << CountNeighbors4(tileCoord, type, true) << " " << minCount << " " << maxCount << std::endl;
             roomTiles.push_back(tileCoord);
         }
     });

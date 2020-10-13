@@ -185,7 +185,7 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                     dungeon->GenerateDungeon(GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider, roomCount, mask), gen);
                 }
             }
-            dungeon->FinishDungeon(true);
+            dungeon->FinishDungeon();
         }
         else if(paletteName.empty() && command == "render") {
             std::string renderType;

@@ -32,7 +32,7 @@ public:
     TileCoord FindRandomTile(TileType type, std::mt19937 & gen) const;
 
     [[ nodiscard ]]
-    TileCoord FindRandomTileNearEdge(TileType type, std::mt19937 & gen) const;
+    TileCoord FindRandomTileNearEdge(TileType type, std::mt19937 & gen, int minCount = 0, int maxCount = 3) const;
 
     [[ nodiscard ]]
     TileCoord FindRandomTileDisconnectible(TileType type, std::mt19937 & gen, const std::set<uint8_t> & validNeighborMasks) const;

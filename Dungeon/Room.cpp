@@ -2,10 +2,12 @@
 
 void Room::GenerateDoors(int count, std::mt19937 &gen) {
     for (int i = 0; i < count; i++) {
-        if(TileCoord find = map.FindRandomTileNearEdge(TileType::WALL, gen)) {
+        if(TileCoord find = map.FindRandomTileNearEdge(TileType::WALL, gen, 3, 3)) {
             doors.push_back(find);
-            map.at(find).type = TileType::DOOR;
         }
+    }
+    for(const auto & door : doors) {
+        map.at(door).type = TileType::DOOR;
     }
 }
 
