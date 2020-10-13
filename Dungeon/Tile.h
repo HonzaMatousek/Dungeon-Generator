@@ -14,5 +14,4 @@ enum class TileType {
 class Tile {
 public:
     TileType type = TileType::WALL;
-    int roomNumber = 0;
 };

@@ -40,7 +40,7 @@ void MazeFurniture::FurnitureRoom(Room & room, std::mt19937 &gen) const {
     }
     while(TileCoord tileCoord = room.map.FindRandomTileDisconnectible(TileType::FLOOR, gen, *selectedMazeMask)) {
         room.map.at(tileCoord).type = TileType::WALL;
-        room.map.at(tileCoord).roomNumber = 0;
+        //room.map.at(tileCoord).roomNumber = 0;
     }
     FurnitureStyle::FurnitureRoom(room, gen);
 }

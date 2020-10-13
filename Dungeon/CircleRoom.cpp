@@ -7,7 +7,6 @@ void CircleRoom::Generate(std::mt19937 & gen) {
     map.WalkTiles([&](const TileCoord & tileCoord) {
         if(tileCoord.DistancePythagorean(center) < radius) {
             map.at(tileCoord).type = TileType::FLOOR;
-            map.at(tileCoord).roomNumber = 1;
         }
     });
     GenerateDoors((int)radius * 2, gen);

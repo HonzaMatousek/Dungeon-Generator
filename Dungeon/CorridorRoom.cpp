@@ -32,7 +32,7 @@ void CorridorRoom::Generate(std::mt19937 & gen) {
         map.WalkTiles([&] (const TileCoord & tileCoord) {
             if(tileCoord.x < 1 || tileCoord.y < 1 || tileCoord.x > roomW || tileCoord.y > roomH) return;
             map.at(tileCoord).type = TileType::FLOOR;
-            map.at(tileCoord).roomNumber = 1;
+            //map.at(tileCoord).roomNumber = 1;
         });
         GenerateDoors(std::sqrt(roomW * roomH), gen);
     }

@@ -66,7 +66,6 @@ TileCoord Map::WalkTilesUntilValid(const std::function<TileCoord(const TileCoord
 
 void Map::Reset() {
     WalkTiles([&](const TileCoord & tileCoord) {
-        at(tileCoord).roomNumber = 0;
         at(tileCoord).type = TileType::WALL;
     });
 }
@@ -74,7 +73,6 @@ void Map::Reset() {
 void Map::Noise(std::mt19937 &gen) {
     auto d = std::uniform_int_distribution(0, 1);
     WalkTiles([&](const TileCoord & tileCoord) {
-        at(tileCoord).roomNumber = 0;
         if(tileCoord.x == 0 || tileCoord.x == width - 1 || tileCoord.y == 0 || tileCoord.y == height - 1) {
             at(tileCoord).type = TileType::WALL;
         }
@@ -216,22 +214,22 @@ int Map::GetHeight() const {
     return height;
 }
 
-inline int RoomFlood4(int roomNumber, TileType type, const TileCoord & tileCoord, Map & map) {
+inline int RoomFlood4(int roomNumber, TileType type, const TileCoord & tileCoord, Map & map, std::vector<std::vector<int>> & roomNumbers) {
     int x = tileCoord.x;
     int y = tileCoord.y;
-    if(map.at(tileCoord).roomNumber == roomNumber || map.at(tileCoord).type != type) return 0;
-    map.at(tileCoord).roomNumber = roomNumber;
+    if(roomNumbers[tileCoord.y][tileCoord.x] == roomNumber || map.at(tileCoord).type != type) return 0;
+    roomNumbers[tileCoord.y][tileCoord.x] = roomNumber;
     int result = 1;
-    if(y > 0)                   result += RoomFlood4(roomNumber, type, { x, y - 1 }, map);
-    if(y < map.GetHeight() - 1) result += RoomFlood4(roomNumber, type, { x, y + 1 }, map);
-    if(x > 0)                   result += RoomFlood4(roomNumber, type, { x - 1, y }, map);
-    if(x < map.GetWidth() - 1)  result += RoomFlood4(roomNumber, type, { x + 1, y }, map);
+    if(y > 0)                   result += RoomFlood4(roomNumber, type, { x, y - 1 }, map, roomNumbers);
+    if(y < map.GetHeight() - 1) result += RoomFlood4(roomNumber, type, { x, y + 1 }, map, roomNumbers);
+    if(x > 0)                   result += RoomFlood4(roomNumber, type, { x - 1, y }, map, roomNumbers);
+    if(x < map.GetWidth() - 1)  result += RoomFlood4(roomNumber, type, { x + 1, y }, map, roomNumbers);
     return result;
 }
 
-inline TileCoord FindAvailableTile(TileType type, const Map & map) {
+inline TileCoord FindAvailableTile(TileType type, const Map & map, std::vector<std::vector<int>> & roomNumbers) {
     return map.WalkTilesUntilValid([&](const TileCoord & tileCoord) {
-        if(map.at(tileCoord).type == type && map.at(tileCoord).roomNumber == 0) {
+        if(map.at(tileCoord).type == type && roomNumbers[tileCoord.y][tileCoord.x] == 0) {
             return tileCoord;
         }
         else {
@@ -244,9 +242,17 @@ bool Map::KeepConnectedPart(TileType type, int minTileCount, int maxTileCount) {
     int bestRoomNumber = 0;
     int roomCounter = 0;
     int bestRoomSize = minTileCount;
-    while(TileCoord find = FindAvailableTile(TileType::FLOOR, *this)) {
+    std::vector<std::vector<int>> roomNumbers;
+    roomNumbers.resize(height);
+    for(auto & row : roomNumbers) {
+        row.resize(width);
+        for(auto & tile : row) {
+            tile = 0;
+        }
+    }
+    while(TileCoord find = FindAvailableTile(TileType::FLOOR, *this, roomNumbers)) {
         roomCounter++;
-        int roomSize = RoomFlood4(roomCounter, TileType::FLOOR, find, *this);
+        int roomSize = RoomFlood4(roomCounter, TileType::FLOOR, find, *this, roomNumbers);
         if (roomSize > bestRoomSize && roomSize < maxTileCount) {
             bestRoomSize = roomSize;
             bestRoomNumber = roomCounter;
@@ -256,10 +262,9 @@ bool Map::KeepConnectedPart(TileType type, int minTileCount, int maxTileCount) {
         return false;
     }
     WalkTiles([&](const TileCoord & tileCoord) {
-        if(at(tileCoord).type == type && at(tileCoord).roomNumber != bestRoomNumber) {
+        if(at(tileCoord).type == type && roomNumbers[tileCoord.y][tileCoord.x] != bestRoomNumber) {
             at(tileCoord).type = TileType::WALL;
         }
-        at(tileCoord).roomNumber = 0;
     });
     return true;
 }
