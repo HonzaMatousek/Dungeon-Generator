@@ -1,0 +1,40 @@
+palette caves
+    room 1 cave 50 20 0.3 0.4
+    room 1 cave 30 30 0.3 0.4
+
+    furniture 1 monster
+    furniture 10 empty
+end
+
+palette mines
+    room 10 cave 10 10 0.3 0.4
+    room 1 cave 20 20 0.3 0.4
+
+    furniture 10 monster
+    furniture 1 chest
+end
+
+palette forest
+    room 1 cave 50 50 0.4 0.7
+
+    furniture 1 maze_direct then
+        furniture 2 monster
+        furniture 1 empty
+    end
+end
+
+group cave_system
+    rooms 3 caves
+end
+
+group mine_system
+    rooms 5 mines
+end
+
+rooms 10 forest
+# rooms 2 cave_system
+# rooms 5 mine_system
+
+dungeon 240 135
+
+render dungeon08a.tga

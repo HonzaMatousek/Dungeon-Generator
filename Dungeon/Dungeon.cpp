@@ -35,21 +35,23 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
     }
 
     int generatedRoomCounter = 0;
-    const int tryCountLimit = 1500;
+    const int tryCountLimit = 10;
     int failureCounter = 0;
-    const int failureLimit = 2;
+    const int failureLimit = 20;
     for(; generatedRoomCounter < generatorPreset.MaxRoomCount() && failureCounter < failureLimit;) {
         for (int tryCounter = 0; tryCounter < tryCountLimit && failureCounter < failureLimit; tryCounter++) {
             auto otherRoom = generatorPreset.RandomRoom(gen);
             otherRoom->Generate(gen);
             if (TryPlaceRoomRandomly(*otherRoom, gen)) {
                 generatedRoomCounter += 1;
+                failureCounter = 0;
                 std::unique_ptr<FurnitureStyle> furnitureStyle = generatorPreset.RandomFurnitureStyle(gen);
                 furnitureStyle->FurnitureRoom(*rooms.back(), gen);
                 break;
             }
             if (tryCounter == tryCountLimit - 1) {
                 RemoveLastRoom();
+                generatedRoomCounter--;
                 tryCounter = 0;
                 failureCounter++;
             }
