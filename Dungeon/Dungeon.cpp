@@ -35,7 +35,7 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
     }
 
     int generatedRoomCounter = 0;
-    const int tryCountLimit = 10;
+    const int tryCountLimit = 50;
     int failureCounter = 0;
     const int failureLimit = 20;
     for(; generatedRoomCounter < generatorPreset.MaxRoomCount() && failureCounter < failureLimit;) {
@@ -50,8 +50,10 @@ void Dungeon::GenerateDungeon(const GeneratorPreset & generatorPreset, std::mt19
                 break;
             }
             if (tryCounter == tryCountLimit - 1) {
-                RemoveLastRoom();
-                generatedRoomCounter--;
+                if(generatedRoomCounter > 0) {
+                    RemoveLastRoom();
+                    generatedRoomCounter--;
+                }
                 tryCounter = 0;
                 failureCounter++;
             }

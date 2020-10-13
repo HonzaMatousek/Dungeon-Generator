@@ -19,6 +19,7 @@
 #include "../Dungeon/CircleRoom.h"
 #include "RoomGroup.h"
 #include "../Dungeon/DungeonRoom.h"
+#include "../Dungeon/CorridorRoom.h"
 
 void Parser::Run(const std::string &fileName) {
     std::ifstream inFile(fileName);
@@ -60,6 +61,9 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             }
             else if(roomType == "rectangle") {
                 palette.roomProvider.RegisterRoom(std::make_unique<RectangleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
+            }
+            else if(roomType == "corridor") {
+                palette.roomProvider.RegisterRoom(std::make_unique<CorridorRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
             }
             else if(roomType == "circle") {
                 palette.roomProvider.RegisterRoom(std::make_unique<CircleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity), weight);
@@ -124,6 +128,12 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
             else if(roomType == "rectangle") {
                 mask = std::make_unique<RectangleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity);
             }
+            else if(roomType == "corridor") {
+                mask = std::make_unique<CorridorRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity);
+            }
+            else if(roomType == "circle") {
+                mask = std::make_unique<CircleRoom>(roomWidth, roomHeight, roomMinDensity, roomMaxDensity);
+            }
         }
         else if(paletteName.empty() && command == "rooms") {
             int roomCount;
@@ -175,7 +185,7 @@ void Parser::RunPalette(std::istream &input, std::map<std::string, Palette> & pa
                     dungeon->GenerateDungeon(GeneratorPreset(usedPalette.roomProvider, usedPalette.furnitureProvider, roomCount, mask), gen);
                 }
             }
-            dungeon->FinishDungeon();
+            dungeon->FinishDungeon(true);
         }
         else if(paletteName.empty() && command == "render") {
             std::string renderType;
