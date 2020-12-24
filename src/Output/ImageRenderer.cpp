@@ -2,7 +2,7 @@
 #include <fstream>
 
 ImageRenderer::ImageRenderer(const std::string & outputFileName) : outputFileName(outputFileName) {
-    std::ifstream tilesFile("dungeon-tiles.tga", std::ios::binary);
+    std::ifstream tilesFile("assets/dungeon-tiles.tga", std::ios::binary);
     char TGAHeader[18];
     tilesFile.read(TGAHeader, sizeof(TGAHeader));
     tiles.resize(64 * 64 * 3);
